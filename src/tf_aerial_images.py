@@ -25,7 +25,8 @@ import tensorflow as tf
 NUM_CHANNELS = 3 # RGB images
 PIXEL_DEPTH = 255
 NUM_LABELS = 2
-TRAINING_SIZE = 20
+TRAINING_SIZE = 50
+TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
@@ -66,6 +67,33 @@ def extract_data(filename, num_images):
     for i in range(1, num_images+1):
         imageid = "satImage_%.3d" % i
         image_filename = filename + imageid + ".png"
+        if os.path.isfile(image_filename):
+            print ('Loading ' + image_filename)
+            img = mpimg.imread(image_filename)
+            imgs.append(img)
+        else:
+            print ('File ' + image_filename + ' does not exist')
+
+    num_images = len(imgs)
+    IMG_WIDTH = imgs[0].shape[0]
+    IMG_HEIGHT = imgs[0].shape[1]
+    N_PATCHES_PER_IMAGE = (IMG_WIDTH/IMG_PATCH_SIZE)*(IMG_HEIGHT/IMG_PATCH_SIZE)
+
+    img_patches = [img_crop(imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
+    data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
+
+    return numpy.asarray(data)
+
+def extract_testdata(filename, num_images):
+    """Extract the images into a 4D tensor [image index, y, x, channels].
+    Values are rescaled from [0, 255] down to [-0.5, 0.5].
+    """
+    imgs = []
+    for i in range(1, num_images+1):
+        imageid = "/test_%d" % i
+        #image_filename = filename + "/" + imageid + "/" imageid + ".png"
+        image_filename = filename + imageid + imageid + ".png"
+        print(image_filename)
         if os.path.isfile(image_filename):
             print ('Loading ' + image_filename)
             img = mpimg.imread(image_filename)
@@ -188,14 +216,17 @@ def make_img_overlay(img, predicted_img):
 
 def main(argv=None):  # pylint: disable=unused-argument
 
-    data_dir = 'data/training/'
-    train_data_filename = data_dir + 'images/'
-    train_labels_filename = data_dir + 'groundtruth/' 
+    data_dir = 'data/'
+    train_data_filename = data_dir + 'training/images/'
+    train_labels_filename = data_dir + 'training/groundtruth/' 
+    test_data_filename = data_dir + 'test_set_images'
+
     print("hei",train_data_filename)
 
     # Extract it into numpy arrays.
     train_data = extract_data(train_data_filename, TRAINING_SIZE)
     train_labels = extract_labels(train_labels_filename, TRAINING_SIZE)
+    test_data = extract_testdata(test_data_filename,TESTING_SIZE)
 
     num_epochs = NUM_EPOCHS
 
@@ -518,9 +549,23 @@ def main(argv=None):  # pylint: disable=unused-argument
             Image.fromarray(pimg).save(filename)
             #image_filenames.append(filename)
             oimg = get_prediction_with_overlay(train_data_filename, i)
-            oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png")    
+            oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png") 
 
-        #masks_to_submission('testlevering', image_filenames)   
+        print ("Running prediction on testing set")
+        prediction_test_dir = "predictions_test/"
+        image_filenames = []
+        if not os.path.isdir(prediction_test_dir):
+            os.mkdir(prediction_test_dir)
+        for i in range(1, TESTING_SIZE+1):
+            #pimg = get_prediction_with_groundtruth(train_data_filename, i)
+            filename = prediction_test_dir + "prediction_" + str(i) + ".png"
+            Image.fromarray(pimg).save(filename)
+            image_filenames.append(filename)
+            oimg = get_prediction_with_overlay(train_data_filename, i)
+            oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png")
+        masks_to_submission("test",*image_filenames)     
+
+          
 
 
 
