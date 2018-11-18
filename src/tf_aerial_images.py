@@ -49,6 +49,8 @@ def img_crop(im, w, h):
     list_patches = []
     imgwidth = im.shape[0]
     imgheight = im.shape[1]
+    print('IMGWIDTH: ', imgwidth)
+    print('IMGHEIGHT: ',  imgheight)
     is_2d = len(im.shape) < 3
     for i in range(0,imgheight,h):
         for j in range(0,imgwidth,w):
