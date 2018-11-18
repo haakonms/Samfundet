@@ -215,6 +215,18 @@ def make_img_overlay(img, predicted_img):
     new_img = Image.blend(background, overlay, 0.2)
     return new_img
 
+def make_img_binary(img, predicted_img):
+    w = img.shape[0]
+    h = img.shape[1]
+    color_mask = numpy.zeros((w, h, 3), dtype=numpy.uint8)
+    color_mask[:,:,0] = predicted_img*PIXEL_DEPTH
+
+    img8 = img_float_to_uint8(img)
+    background = Image.fromarray(img8, 'RGB').convert("RGBA")
+    overlay = Image.fromarray(color_mask, 'RGB').convert("RGBA")
+    new_img = Image.blend(background, overlay, 0.2)
+    return new_img
+
 
 def main(argv=None):  # pylint: disable=unused-argument
 
@@ -344,6 +356,54 @@ def main(argv=None):  # pylint: disable=unused-argument
 
         return cimg
 
+    # Get a concatenation of the prediction and groundtruth for given input file
+    def get_prediction_with_groundtruth_test(filename, image_idx):
+
+        imageid = "/test_%d" % i
+        #image_filename = filename + "/" + imageid + "/" imageid + ".png"
+        image_filename = filename + imageid + imageid + ".png"
+        img = mpimg.imread(image_filename)
+
+        img_prediction = get_prediction(img)
+        cimg = concatenate_images(img, img_prediction)
+
+        return cimg
+
+    def get_predictionimage_test(filename, image_idx):
+
+        imageid = "/test_%d" % i
+        #image_filename = filename + "/" + imageid + "/" imageid + ".png"
+        image_filename = filename + imageid + imageid + ".png"
+        img = mpimg.imread(image_filename)
+
+        img_prediction = get_prediction(img)
+        img_prediction[img_prediction == 0] = 100
+        img_prediction[img_prediction == 1] = 0
+        img_prediction[img_prediction == 100] = 1
+
+        #print(img_prediction)
+        #cimg = concatenate_images(img, img_prediction)
+
+        nChannels = len(img_prediction.shape)
+        
+        w = img_prediction.shape[0]
+        h = img_prediction.shape[1]
+        if nChannels != 3:
+            img_prediction_3c = numpy.zeros((w, h, 3), dtype=numpy.uint8)
+            img_prediction8 = img_float_to_uint8(img_prediction)          
+            img_prediction_3c[:,:,0] = img_prediction8
+            img_prediction_3c[:,:,1] = img_prediction8
+            img_prediction_3c[:,:,2] = img_prediction8
+
+
+        imgpred = Image.fromarray(img_prediction_3c)
+
+        #filename = prediction_training_dir + "prediction_" + str(i) + ".png"
+        #.save(filename)
+
+        return imgpred
+
+
     # Get prediction overlaid on the original image for given input file
     def get_prediction_with_overlay(filename, image_idx):
 
@@ -355,6 +415,20 @@ def main(argv=None):  # pylint: disable=unused-argument
         oimg = make_img_overlay(img, img_prediction)
 
         return oimg
+
+    # Get prediction overlaid on the original image for given input file
+    def get_prediction_with_overlay_test(filename, image_idx):
+
+        imageid = "/test_%d" % i
+        #image_filename = filename + "/" + imageid + "/" imageid + ".png"
+        image_filename = filename + imageid + imageid + ".png"
+        img = mpimg.imread(image_filename)
+
+        img_prediction = get_prediction(img)
+        oimg = make_img_overlay(img, img_prediction)
+
+        return oimg
+
 
     # We will replicate the model structure for the training subgraph, as well
     # as the evaluation subgraphs, while sharing the trainable parameters.
@@ -547,8 +621,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             os.mkdir(prediction_training_dir)
         for i in range(1, TRAINING_SIZE+1):
             pimg = get_prediction_with_groundtruth(train_data_filename, i)
-            filename = prediction_training_dir + "prediction_" + str(i) + ".png"
-            Image.fromarray(pimg).save(filename)
+            Image.fromarray(pimg).save(prediction_training_dir + "prediction_" + str(i) + ".png")
             #image_filenames.append(filename)
             oimg = get_prediction_with_overlay(train_data_filename, i)
             oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png") 
@@ -559,18 +632,26 @@ def main(argv=None):  # pylint: disable=unused-argument
         if not os.path.isdir(prediction_test_dir):
             os.mkdir(prediction_test_dir)
         for i in range(1, TESTING_SIZE+1):
-            #pimg = get_prediction_with_groundtruth(train_data_filename, i)
-            filename = prediction_test_dir + "prediction_" + str(i) + ".png"
-            Image.fromarray(pimg).save(filename)
+            test_data_filename = data_dir + 'test_set_images/'
+
+            pimg = get_prediction_with_groundtruth_test(test_data_filename, i)
+            Image.fromarray(pimg).save(prediction_test_dir + "prediction_" + str(i) + ".png")
+            
+            oimg = get_prediction_with_overlay_test(test_data_filename, i)
+            oimg.save(prediction_test_dir + "overlay_" + str(i) + ".png")
+
+            filename = prediction_test_dir + "predictimg_" + str(i) + ".png"
+            imgpred = get_predictionimage_test(test_data_filename, i)
+            imgpred.save(filename)
+
+
             image_filenames.append(filename)
-            oimg = get_prediction_with_overlay(train_data_filename, i)
-            oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png")
+
+
         masks_to_submission("test",*image_filenames)     
 
+
           
-
-
-
 
 if __name__ == '__main__':
     tf.app.run()
