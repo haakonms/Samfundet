@@ -229,6 +229,9 @@ def make_img_binary(img, predicted_img):
     return new_img
 
 
+############# MAIN #################
+
+
 def main(argv=None):  # pylint: disable=unused-argument
 
     data_dir = 'data/'
@@ -246,9 +249,14 @@ def main(argv=None):  # pylint: disable=unused-argument
     print('Loading test images\n')
     test_data = extract_testdata(test_data_filename,TESTING_SIZE)
 
+    print('Train data shape: ',train_data.shape)
+    print('Train labels shape: ',train_labels.shape)
+    print('Test data shape: ',test_data.shape)
+
 
     num_epochs = NUM_EPOCHS
 
+    #### Balanced the data to get the equal amount of training datapoints in each class
     c0 = 0
     c1 = 0
     for i in range(len(train_labels)):
@@ -258,15 +266,16 @@ def main(argv=None):  # pylint: disable=unused-argument
             c1 = c1 + 1
     print ('Number of data points per class: c0 = ' + str(c0) + ' c1 = ' + str(c1))
 
-    print ('Balancing training data...')
+    print ('\nBalancing training data...')
     min_c = min(c0, c1)
     idx0 = [i for i, j in enumerate(train_labels) if j[0] == 1]
     idx1 = [i for i, j in enumerate(train_labels) if j[1] == 1]
     new_indices = idx0[0:min_c] + idx1[0:min_c]
-    print ('Length new indices: ',len(new_indices))
-    print ('Shape of training data: ',train_data.shape)
+
     train_data = train_data[new_indices,:,:,:]
     train_labels = train_labels[new_indices]
+    print ('Number of balanced training data: ',len(new_indices))
+    print ('Shape of balanced training data: ',train_data.shape)
 
 
     train_size = train_labels.shape[0]
@@ -278,7 +287,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             c0 = c0 + 1
         else:
             c1 = c1 + 1
-    print ('Number of data points per class: c0 = ' + str(c0) + ' c1 = ' + str(c1))
+    print ('Number of data points per class after balancing: c0 = ' + str(c0) + ' c1 = ' + str(c1), '\n')
 
 
     # This is where training samples and labels are fed to the graph.
@@ -295,20 +304,23 @@ def main(argv=None):  # pylint: disable=unused-argument
     # initial value which will be assigned when when we call:
     # {tf.initialize_all_variables().run()}
     conv1_weights = tf.Variable(
-        tf.truncated_normal([5, 5, NUM_CHANNELS, 32],  # 5x5 filter, depth 32.
+        tf.truncated_normal([5, 5, NUM_CHANNELS, 32],  # 5x5 filter, depth 32. #NUM_CHANNELS = 3
                             stddev=0.1,
                             seed=SEED))
     conv1_biases = tf.Variable(tf.zeros([32]))
+    
     conv2_weights = tf.Variable(
         tf.truncated_normal([5, 5, 32, 64],
                             stddev=0.1,
                             seed=SEED))
     conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]))
+    
     fc1_weights = tf.Variable(  # fully connected, depth 512.
         tf.truncated_normal([int(IMG_PATCH_SIZE / 4 * IMG_PATCH_SIZE / 4 * 64), 512],
                             stddev=0.1,
                             seed=SEED))
     fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]))
+    
     fc2_weights = tf.Variable(
         tf.truncated_normal([512, NUM_LABELS],
                             stddev=0.1,
@@ -430,9 +442,12 @@ def main(argv=None):  # pylint: disable=unused-argument
         return oimg
 
 
+    ############# MODEL DEFINITION ################# 
+
     # We will replicate the model structure for the training subgraph, as well
     # as the evaluation subgraphs, while sharing the trainable parameters.
     def model(data, train=False):
+        
         """The Model definition."""
         # 2D convolution, with 'SAME' padding (i.e. the output feature map has
         # the same size as the input). Note that {strides} is a 4D array whose
@@ -459,6 +474,17 @@ def main(argv=None):  # pylint: disable=unused-argument
                               ksize=[1, 2, 2, 1],
                               strides=[1, 2, 2, 1],
                               padding='SAME')
+        
+        """
+        conv3 = tf.nn.conv2d(pool,
+                            conv3_weights,
+                            strides=[1, 1, 1, 1],
+                            padding='SAME')
+        relu3 = tf.nn.relu(tf.nn.bias_add(conv3, conv3_biases))
+        pool3 = tf.nn.max_pool(relu3,
+                              ksize=[1, 2, 2, 1],
+                              strides=[1, 2, 2, 1],
+                              padding='SAME')"""
 
         # Uncomment these lines to check the size of each layer
         # print 'data ' + str(data.get_shape())
@@ -468,15 +494,16 @@ def main(argv=None):  # pylint: disable=unused-argument
         # print 'pool2 ' + str(pool2.get_shape())
 
 
-        # Reshape the feature map cuboid into a 2D matrix to feed it to the
-        # fully connected layers.
+        # Reshape the feature map cuboid into a 2D matrix to feed it to the fully connected layers.
         pool_shape = pool2.get_shape().as_list()
         reshape = tf.reshape(
             pool2,
             [pool_shape[0], pool_shape[1] * pool_shape[2] * pool_shape[3]])
+        
         # Fully connected layer. Note that the '+' operation automatically
         # broadcasts the biases.
         hidden = tf.nn.relu(tf.matmul(reshape, fc1_weights) + fc1_biases)
+        
         # Add a 50% dropout during training only. Dropout also scales
         # activations such that no rescaling is needed at evaluation time.
         #if train:
@@ -588,6 +615,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                     feed_dict = {train_data_node: batch_data,
                                  train_labels_node: batch_labels}
 
+                    # Only prints for step = 0
                     if step % RECORDING_STEP == 0:
 
                         summary_str, _, l, lr, predictions = s.run(
@@ -599,7 +627,8 @@ def main(argv=None):  # pylint: disable=unused-argument
 
                         # print_predictions(predictions, batch_labels)
 
-                        print ('Epoch %.2f' % (float(step) * BATCH_SIZE / train_size))
+                        #print(step, ' ',BATCH_SIZE,' ', train_size)
+                        print ('\nEpoch %.6f' % (float(step) * BATCH_SIZE / train_size))
                         print ('Minibatch loss: %.3f, learning rate: %.6f' % (l, lr))
                         print ('Minibatch error: %.1f%%' % error_rate(predictions,
                                                                      batch_labels))
