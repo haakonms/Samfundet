@@ -368,18 +368,6 @@ def main(argv=None):  # pylint: disable=unused-argument
 
         return cimg
 
-    # Get a concatenation of the prediction and groundtruth for given input file
-    def get_prediction_with_groundtruth_test(filename, image_idx):
-
-        imageid = "/test_%d" % i
-        #image_filename = filename + "/" + imageid + "/" imageid + ".png"
-        image_filename = filename + imageid + imageid + ".png"
-        img = mpimg.imread(image_filename)
-
-        img_prediction = get_prediction(img)
-        cimg = concatenate_images(img, img_prediction)
-
-        return cimg
 
     def get_predictionimage(filename, image_idx, datatype):
 
@@ -434,19 +422,6 @@ def main(argv=None):  # pylint: disable=unused-argument
         else:
             print('Error: Enter test or train')
 
-        img = mpimg.imread(image_filename)
-
-        img_prediction = get_prediction(img)
-        oimg = make_img_overlay(img, img_prediction)
-
-        return oimg
-
-    # Get prediction overlaid on the original image for given input file
-    def get_prediction_with_overlay_test(filename, image_idx):
-
-        imageid = "/test_%d" % i
-        #image_filename = filename + "/" + imageid + "/" imageid + ".png"
-        image_filename = filename + imageid + imageid + ".png"
         img = mpimg.imread(image_filename)
 
         img_prediction = get_prediction(img)
