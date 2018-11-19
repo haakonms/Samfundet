@@ -9,6 +9,7 @@ Credits: Aurelien Lucchi, ETH Zürich
 
 import gzip
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import sys
 import urllib
 import matplotlib.image as mpimg
@@ -70,7 +71,7 @@ def extract_data(filename, num_images):
         imageid = "satImage_%.3d" % i
         image_filename = filename + imageid + ".png"
         if os.path.isfile(image_filename):
-            print ('Loading ' + image_filename)
+            #print ('Loading ' + image_filename)
             img = mpimg.imread(image_filename)
             imgs.append(img)
         else:
@@ -95,9 +96,9 @@ def extract_testdata(filename, num_images):
         imageid = "/test_%d" % i
         #image_filename = filename + "/" + imageid + "/" imageid + ".png"
         image_filename = filename + imageid + imageid + ".png"
-        print(image_filename)
+        #print(image_filename)
         if os.path.isfile(image_filename):
-            print ('Loading ' + image_filename)
+        #    print ('Loading ' + image_filename)
             img = mpimg.imread(image_filename)
             imgs.append(img)
         else:
@@ -130,7 +131,7 @@ def extract_labels(filename, num_images):
         imageid = "satImage_%.3d" % i
         image_filename = filename + imageid + ".png"
         if os.path.isfile(image_filename):
-            print ('Loading ' + image_filename)
+            #print ('Loading ' + image_filename)
             img = mpimg.imread(image_filename)
             gt_imgs.append(img)
         else:
@@ -235,12 +236,16 @@ def main(argv=None):  # pylint: disable=unused-argument
     train_labels_filename = data_dir + 'training/groundtruth/' 
     test_data_filename = data_dir + 'test_set_images'
 
-    print("hei",train_data_filename)
+    #print("hei",train_data_filename)
 
     # Extract it into numpy arrays.
+    print('\nLoading training images')
     train_data = extract_data(train_data_filename, TRAINING_SIZE)
+    print('Loading training labels')
     train_labels = extract_labels(train_labels_filename, TRAINING_SIZE)
+    print('Loading test images\n')
     test_data = extract_testdata(test_data_filename,TESTING_SIZE)
+
 
     num_epochs = NUM_EPOCHS
 
@@ -258,8 +263,8 @@ def main(argv=None):  # pylint: disable=unused-argument
     idx0 = [i for i, j in enumerate(train_labels) if j[0] == 1]
     idx1 = [i for i, j in enumerate(train_labels) if j[1] == 1]
     new_indices = idx0[0:min_c] + idx1[0:min_c]
-    print (len(new_indices))
-    print (train_data.shape)
+    print ('Length new indices: ',len(new_indices))
+    print ('Shape of training data: ',train_data.shape)
     train_data = train_data[new_indices,:,:,:]
     train_labels = train_labels[new_indices]
 
@@ -345,10 +350,17 @@ def main(argv=None):  # pylint: disable=unused-argument
         return img_prediction
 
     # Get a concatenation of the prediction and groundtruth for given input file
-    def get_prediction_with_groundtruth(filename, image_idx):
+    def get_prediction_with_groundtruth(filename, image_idx, datatype):
 
-        imageid = "satImage_%.3d" % image_idx
-        image_filename = filename + imageid + ".png"
+        if (datatype == 'train'):
+            imageid = "satImage_%.3d" % image_idx
+            image_filename = filename + imageid + ".png"
+        elif (datatype == 'test'):
+            imageid = "/test_%d" % i
+            image_filename = filename + imageid + imageid + ".png"
+        else:
+            print('Error: Enter test or train')
+
         img = mpimg.imread(image_filename)
 
         img_prediction = get_prediction(img)
@@ -369,11 +381,17 @@ def main(argv=None):  # pylint: disable=unused-argument
 
         return cimg
 
-    def get_predictionimage_test(filename, image_idx):
+    def get_predictionimage(filename, image_idx, datatype):
 
-        imageid = "/test_%d" % i
-        #image_filename = filename + "/" + imageid + "/" imageid + ".png"
-        image_filename = filename + imageid + imageid + ".png"
+        if (datatype == 'train'):
+            imageid = "satImage_%.3d" % image_idx
+            image_filename = filename + imageid + ".png"
+        elif (datatype == 'test'):
+            imageid = "/test_%d" % i
+            image_filename = filename + imageid + imageid + ".png"
+        else:
+            print('Error: Enter test or train')      
+
         img = mpimg.imread(image_filename)
 
         img_prediction = get_prediction(img)
@@ -405,10 +423,17 @@ def main(argv=None):  # pylint: disable=unused-argument
 
 
     # Get prediction overlaid on the original image for given input file
-    def get_prediction_with_overlay(filename, image_idx):
+    def get_prediction_with_overlay(filename, image_idx, datatype):
 
-        imageid = "satImage_%.3d" % image_idx
-        image_filename = filename + imageid + ".png"
+        if (datatype == 'train'):
+            imageid = "satImage_%.3d" % image_idx
+            image_filename = filename + imageid + ".png"
+        elif (datatype == 'test'):
+            imageid = "/test_%d" % i
+            image_filename = filename + imageid + imageid + ".png"
+        else:
+            print('Error: Enter test or train')
+
         img = mpimg.imread(image_filename)
 
         img_prediction = get_prediction(img)
@@ -555,13 +580,15 @@ def main(argv=None):  # pylint: disable=unused-argument
 
         else:
             # Run all the initializers to prepare the trainable parameters.
-            tf.initialize_all_variables().run()
+            tf.global_variables_initializer().run()
 
             # Build the summary operation based on the TF collection of Summaries.
             summary_op = tf.summary.merge_all()
+            #summary_writer = tf.summary.FileWriter(FLAGS.train_dir,
+            #                                        graph_def=s.graph_def)
             summary_writer = tf.summary.FileWriter(FLAGS.train_dir,
-                                                    graph_def=s.graph_def)
-            print ('Initialized!')
+                                                    graph=s.graph)
+            print ('Initialized!\n')
             # Loop through training steps.
             print ('Total number of iterations = ' + str(int(num_epochs * train_size / BATCH_SIZE)))
 
@@ -614,18 +641,20 @@ def main(argv=None):  # pylint: disable=unused-argument
                 print("Model saved in file: %s" % save_path)
 
 
+        # This block can be commented out to save time
         print ("Running prediction on training set")
         prediction_training_dir = "predictions_training/"
         #image_filenames = []
         if not os.path.isdir(prediction_training_dir):
             os.mkdir(prediction_training_dir)
         for i in range(1, TRAINING_SIZE+1):
-            pimg = get_prediction_with_groundtruth(train_data_filename, i)
+            pimg = get_prediction_with_groundtruth(train_data_filename, i, 'train')
             Image.fromarray(pimg).save(prediction_training_dir + "prediction_" + str(i) + ".png")
             #image_filenames.append(filename)
-            oimg = get_prediction_with_overlay(train_data_filename, i)
+            oimg = get_prediction_with_overlay(train_data_filename, i, 'train')
             oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png") 
 
+        
         print ("Running prediction on testing set")
         prediction_test_dir = "predictions_test/"
         image_filenames = []
@@ -634,21 +663,23 @@ def main(argv=None):  # pylint: disable=unused-argument
         for i in range(1, TESTING_SIZE+1):
             test_data_filename = data_dir + 'test_set_images/'
 
-            pimg = get_prediction_with_groundtruth_test(test_data_filename, i)
+            pimg = get_prediction_with_groundtruth(test_data_filename, i, 'test')
             Image.fromarray(pimg).save(prediction_test_dir + "prediction_" + str(i) + ".png")
             
-            oimg = get_prediction_with_overlay_test(test_data_filename, i)
+            oimg = get_prediction_with_overlay(test_data_filename, i, 'test')
             oimg.save(prediction_test_dir + "overlay_" + str(i) + ".png")
 
+            # This is the only one that has to be here in order to save the submission file
             filename = prediction_test_dir + "predictimg_" + str(i) + ".png"
-            imgpred = get_predictionimage_test(test_data_filename, i)
+            imgpred = get_predictionimage(test_data_filename, i, 'test')
             imgpred.save(filename)
 
 
             image_filenames.append(filename)
 
-
-        masks_to_submission("test",*image_filenames)     
+        submission_filename = 'test'
+        print('Creating submission file, saving to ', submission_filename,'.csv')
+        masks_to_submission(submission_filename,*image_filenames)     
 
 
           
