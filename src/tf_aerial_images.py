@@ -31,7 +31,7 @@ TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 5
+NUM_EPOCHS = 20
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 
@@ -304,7 +304,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     # initial value which will be assigned when when we call:
     # {tf.initialize_all_variables().run()}
     conv1_weights = tf.Variable(
-        tf.truncated_normal([5, 5, NUM_CHANNELS, 32],  # 5x5 filter, depth 32. #NUM_CHANNELS = 3
+        tf.truncated_normal([2, 2, NUM_CHANNELS, 32],  # 5x5 filter, depth 32. #NUM_CHANNELS = 3
                             stddev=0.1,
                             seed=SEED))
     conv1_biases = tf.Variable(tf.zeros([32]))
@@ -474,17 +474,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                               ksize=[1, 2, 2, 1],
                               strides=[1, 2, 2, 1],
                               padding='SAME')
-        
-        """
-        conv3 = tf.nn.conv2d(pool,
-                            conv3_weights,
-                            strides=[1, 1, 1, 1],
-                            padding='SAME')
-        relu3 = tf.nn.relu(tf.nn.bias_add(conv3, conv3_biases))
-        pool3 = tf.nn.max_pool(relu3,
-                              ksize=[1, 2, 2, 1],
-                              strides=[1, 2, 2, 1],
-                              padding='SAME')"""
+
 
         # Uncomment these lines to check the size of each layer
         # print 'data ' + str(data.get_shape())
@@ -499,7 +489,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         reshape = tf.reshape(
             pool2,
             [pool_shape[0], pool_shape[1] * pool_shape[2] * pool_shape[3]])
-        
+        #print('reshape shape: ', reshape.shape)
         # Fully connected layer. Note that the '+' operation automatically
         # broadcasts the biases.
         hidden = tf.nn.relu(tf.matmul(reshape, fc1_weights) + fc1_biases)
@@ -588,9 +578,9 @@ def main(argv=None):  # pylint: disable=unused-argument
             summary_op = tf.summary.merge_all()
             #summary_writer = tf.summary.FileWriter(FLAGS.train_dir,
             #                                        graph_def=s.graph_def)
-            summary_writer = tf.summary.FileWriter(FLAGS.train_dir,
-                                                    graph=s.graph)
+            summary_writer = tf.summary.FileWriter(FLAGS.train_dir,graph=s.graph)
             print ('Initialized!\n')
+            
             # Loop through training steps.
             print ('Total number of iterations = ' + str(int(num_epochs * train_size / BATCH_SIZE)))
 
@@ -610,10 +600,13 @@ def main(argv=None):  # pylint: disable=unused-argument
                     # Note that we could use better randomization across epochs.
                     batch_data = train_data[batch_indices, :, :, :]
                     batch_labels = train_labels[batch_indices]
+                    
                     # This dictionary maps the batch data (as a numpy array) to the
                     # node in the graph is should be fed to.
-                    feed_dict = {train_data_node: batch_data,
-                                 train_labels_node: batch_labels}
+                    feed_dict = {
+                        train_data_node: batch_data, 
+                        train_labels_node: batch_labels
+                    }
 
                     # Only prints for step = 0
                     if step % RECORDING_STEP == 0:
@@ -632,6 +625,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                         print ('Minibatch loss: %.3f, learning rate: %.6f' % (l, lr))
                         print ('Minibatch error: %.1f%%' % error_rate(predictions,
                                                                      batch_labels))
+                        print('Accuracy: ', accuracy)
 
                         sys.stdout.flush()
                     else:

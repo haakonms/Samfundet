@@ -31,7 +31,7 @@ TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 3
+NUM_EPOCHS = 20
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 
@@ -316,9 +316,13 @@ def main(argv=None):  # pylint: disable=unused-argument
     # Convolutional layer 3, 64 -5x5 filter
     conv3_weights = tf.Variable(tf.truncated_normal([3, 3, 64, 128],stddev=0.1,seed=SEED))
     conv3_biases = tf.Variable(tf.constant(0.1, shape=[128]))
+
+    # Convolutional layer 4, 64 -5x5 filter
+    conv4_weights = tf.Variable(tf.truncated_normal([4, 4, 128, 256],stddev=0.1,seed=SEED))
+    conv4_biases = tf.Variable(tf.constant(0.1, shape=[256]))
     
     fc1_weights = tf.Variable(  # fully connected, depth 512.
-        tf.truncated_normal([int(IMG_PATCH_SIZE / 4 * IMG_PATCH_SIZE / 4 * 64/2), 512], stddev=0.1, seed=SEED))
+        tf.truncated_normal([int(IMG_PATCH_SIZE / 4 * IMG_PATCH_SIZE / 4 * 64/4), 512], stddev=0.1, seed=SEED))
     fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]))
     
     fc2_weights = tf.Variable(tf.truncated_normal([512, NUM_LABELS], stddev=0.1, seed=SEED)) #
@@ -466,6 +470,10 @@ def main(argv=None):  # pylint: disable=unused-argument
         relu3 = tf.nn.relu(tf.nn.bias_add(conv3, conv3_biases))
         pool3 = tf.nn.max_pool(relu3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
+        conv4 = tf.nn.conv2d(pool3, conv4_weights, strides=[1, 1, 1, 1], padding='SAME')
+        relu4 = tf.nn.relu(tf.nn.bias_add(conv4, conv4_biases))
+        pool4 = tf.nn.max_pool(relu4, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+
         # Uncomment these lines to check the size of each layer
         # print 'data ' + str(data.get_shape())
         # print 'conv ' + str(conv.get_shape())
@@ -476,9 +484,9 @@ def main(argv=None):  # pylint: disable=unused-argument
 
         # Reshape the feature map cuboid into a 2D matrix to feed it to the fully connected layers.
         # Flatten
-        pool_shape = pool3.get_shape().as_list()
+        pool_shape = pool4.get_shape().as_list()
         #print(pool_shape)
-        reshape = tf.reshape(pool3,[pool_shape[0], pool_shape[1] * pool_shape[2] * pool_shape[3]])
+        reshape = tf.reshape(pool4,[pool_shape[0], pool_shape[1] * pool_shape[2] * pool_shape[3]])
         
         # Fully connected layer. Note that the '+' operation automatically broadcasts the biases.
         hidden = tf.nn.relu(tf.matmul(reshape, fc1_weights) + fc1_biases)
@@ -510,8 +518,8 @@ def main(argv=None):  # pylint: disable=unused-argument
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits = logits, labels = train_labels_node)) #cost 
     tf.summary.scalar('loss', loss)
 
-    all_params_node = [conv1_weights, conv1_biases, conv2_weights, conv2_biases, conv3_weights, conv3_biases, fc1_weights, fc1_biases, fc2_weights, fc2_biases]
-    all_params_names = ['conv1_weights', 'conv1_biases', 'conv2_weights', 'conv2_biases', 'conv3_weights', 'conv3_biases', 'fc1_weights', 'fc1_biases', 'fc2_weights', 'fc2_biases']
+    all_params_node = [conv1_weights, conv1_biases, conv2_weights, conv2_biases, conv3_weights, conv3_biases, conv4_weights, conv4_biases, fc1_weights, fc1_biases, fc2_weights, fc2_biases]
+    all_params_names = ['conv1_weights', 'conv1_biases', 'conv2_weights', 'conv2_biases', 'conv3_weights', 'conv3_biases', 'conv3_weights', 'conv3_biases', 'fc1_weights', 'fc1_biases', 'fc2_weights', 'fc2_biases']
     all_grads_node = tf.gradients(loss, all_params_node)
     all_grad_norms_node = []
     for i in range(0, len(all_grads_node)):
