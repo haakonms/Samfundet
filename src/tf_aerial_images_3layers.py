@@ -31,7 +31,7 @@ TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 3
+NUM_EPOCHS = 30
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 
@@ -304,21 +304,21 @@ def main(argv=None):  # pylint: disable=unused-argument
     # initial value which will be assigned when when we call:
     # {tf.initialize_all_variables().run()}
     conv1_weights = tf.Variable(
-        tf.truncated_normal([5, 5, NUM_CHANNELS, 32],  # 5x5 filter, depth 32. #NUM_CHANNELS = 3
+        tf.truncated_normal([3, 3, NUM_CHANNELS, 32],  # 5x5 filter, depth 32. #NUM_CHANNELS = 3
                             stddev=0.1,
                             seed=SEED))
     conv1_biases = tf.Variable(tf.zeros([32]))
     
     # Convolutional layer 2, 64 -5x5 filter
-    conv2_weights = tf.Variable(tf.truncated_normal([2, 2, 32, 64],stddev=0.1,seed=SEED))
+    conv2_weights = tf.Variable(tf.truncated_normal([4, 4, 32, 64],stddev=0.1,seed=SEED))
     conv2_biases = tf.Variable(tf.constant(0.1, shape=[64]))
 
     # Convolutional layer 3, 64 -5x5 filter
-    conv3_weights = tf.Variable(tf.truncated_normal([3, 3, 64, 128],stddev=0.1,seed=SEED))
-    conv3_biases = tf.Variable(tf.constant(0.1, shape=[128]))
+    conv3_weights = tf.Variable(tf.truncated_normal([5, 5, 64, 64],stddev=0.1,seed=SEED))
+    conv3_biases = tf.Variable(tf.constant(0.1, shape=[64]))
     
     fc1_weights = tf.Variable(  # fully connected, depth 512.
-        tf.truncated_normal([int(IMG_PATCH_SIZE / 4 * IMG_PATCH_SIZE / 4 * 64/2), 512], stddev=0.1, seed=SEED))
+        tf.truncated_normal([int(IMG_PATCH_SIZE / 4 * IMG_PATCH_SIZE / 4 * 64/4), 512], stddev=0.1, seed=SEED))
     fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]))
     
     fc2_weights = tf.Variable(tf.truncated_normal([512, NUM_LABELS], stddev=0.1, seed=SEED)) #
