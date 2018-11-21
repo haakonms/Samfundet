@@ -217,7 +217,7 @@ def get_prediction(img, model, IMG_PATCH_SIZE):
     return img_prediction
 
 
-def get_predictionimage(filename, image_idx, datatype, model, i, IMG_PATCH_SIZE,PIXEL_DEPTH):
+def get_predictionimage(filename, image_idx, datatype, model, i, IMG_PATCH_SIZE, PIXEL_DEPTH):
 
     if (datatype == 'train'):
         imageid = "satImage_%.3d" % image_idx
@@ -248,20 +248,18 @@ def get_predictionimage(filename, image_idx, datatype, model, i, IMG_PATCH_SIZE,
     # Defines the "black white" image that is to be saved
     predict_img = numpy.zeros([imgwidth, imgheight])
 
-    # Fills image with the predictions for each patch
+    # Fills image with the predictions for each patch, so we have a int at each position in the (608,608) array
     ind = 0
     for i in range(0,imgheight,h):
         for j in range(0,imgwidth,w):
             predict_img[j:j+w, i:i+h] = output_prediction[ind]
             ind += 1
     
-
-    predict_img_3c = numpy.zeros((w, h, 3), dtype=numpy.uint8)
+    predict_img_3c = numpy.zeros((imgwidth, imgheight, 3), dtype=numpy.uint8)
     predict_img8 = img_float_to_uint8(predict_img, 255)          
     predict_img_3c[:,:,0] = predict_img8
     predict_img_3c[:,:,1] = predict_img8
     predict_img_3c[:,:,2] = predict_img8
-
 
     imgpred = Image.fromarray(predict_img_3c)
 

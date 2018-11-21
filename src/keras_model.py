@@ -14,7 +14,6 @@ import tensorflow.python.platform
 import numpy
 import tensorflow as tf
 
-
 import keras
 #from keras.datasets import mnist
 from keras.models import Sequential
@@ -23,7 +22,6 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.utils import np_utils
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
-
 
 
 NUM_CHANNELS = 3 # RGB images
@@ -38,9 +36,8 @@ NUM_EPOCHS = 5
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 
-# Set image patch size in pixels
-# IMG_PATCH_SIZE should be a multiple of 4
-# image size should be an integer multiple of this number!
+# The size of the patches each image is split into. Should be a multiple of 4, and the image
+# size would be a multiple of this. For this assignment to get the delivery correct it has to be 16
 IMG_PATCH_SIZE = 16
 
 
@@ -103,10 +100,12 @@ model.add(Dense(128, activation='relu'))
 #model.add(Dropout(0.5))
 model.add(Dense(NUM_LABELS, activation='softmax'))
 
+# Compile
 model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy'])
 
+# Train the model
 model.fit(x_train, y_train,
           batch_size=BATCH_SIZE,
           epochs=NUM_EPOCHS,
@@ -124,14 +123,14 @@ print(sum(y_submit))
 
 image_filenames=[]
 prediction_test_dir = "predictions_test/"
-'''for i in range(1,TESTING_SIZE+1):
+for i in range(1,TESTING_SIZE+1):
     test_data_filename = data_dir + 'test_set_images'
 
     filename = prediction_test_dir + "predictimg_" + str(i) + ".png"
     imgpred = get_predictionimage(test_data_filename, i, 'test', model, i, IMG_PATCH_SIZE, PIXEL_DEPTH)
     imgpred.save(filename)
     #print(filename)
-    image_filenames.append(filename)'''
+    image_filenames.append(filename)
 
 
 #submission_filename = 'keras_submission'
