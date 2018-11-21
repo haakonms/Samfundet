@@ -92,7 +92,30 @@ def extract_labels(filename, num_images, IMG_PATCH_SIZE):
     return labels.astype(numpy.float32)
 
 
+def load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE):
 
+    print('\nLoading training images')
+    x_train = extract_data(train_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE,  'train')
+    #print(x_train[:10])
+
+    print('Loading training labels')
+    y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
+    #print(y_train[:20])
+
+    print('Loading test images\n')
+    x_test = extract_data(test_data_filename,TESTING_SIZE, IMG_PATCH_SIZE, 'test')
+    #print(x_test[:10])
+
+    print('Train data shape: ',x_train.shape)
+    print('Train labels shape: ',y_train.shape)
+    print('Test data shape: ',x_test.shape)
+
+    [cl1,cl2] = numpy.sum(y_train, axis = 0, dtype = int)
+    print('Number of samples in class 1 (background): ',cl1)
+    print('Number of samples in class 2 (road): ',cl2, '\n')
+
+
+    return x_train, y_train, x_test
 
 
 
@@ -168,57 +191,37 @@ def make_img_binary(img, predicted_img):
 #######
 
 # Convert array of labels to an image
-def label_to_img(imgwidth, imgheight, w, h, labels):
-    array_labels = numpy.zeros([imgwidth, imgheight])
+def label_to_img(imgwidth, imgheight, w, h, output_prediction):
 
-    #for i in range(0,imgheight,h):
-    #    for j in range(0,imgwidth,w):
-            #if labels[idx][0] > 0.5:
-            #    l = 1
-            #else:
-            #    l = 0
-    #        array_labels[j:j+w, i:i+h] = l
-    #        idx = idx + 1
-    
-    #labels = numpy.array(labels)
+    # Defines the "black white" image that is to be saved
+    predict_img = numpy.zeros([imgwidth, imgheight])
+
+    # Fills image with the predictions for each patch, so we have a int at each position in the (608,608) array
     ind = 0
     for i in range(0,imgheight,h):
         for j in range(0,imgwidth,w):
-            array_labels[j:j+w, i:i+h] = labels[ind]
-            #list_patches.append(im_patch)
+            predict_img[j:j+w, i:i+h] = output_prediction[ind]
             ind += 1
-    
-    return array_labels
 
-
-
-    array_labels = numpy.reshape(labels,(-1,int(imgwidth)))
-    print(array_labels.shape)
-
-
-    return array_labels
-
+    return predict_img
 
 def get_prediction(img, model, IMG_PATCH_SIZE):
+    
+    # Turns the image into its data patches
     data = numpy.asarray(img_crop(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE))
-    print('\n\nhei')
-    print(data.shape)
-    print(data[:1])
+    #shape ((38*38), 16,16,3)
 
+    # Data now is a vector of the patches from one single image in the testing data
     output_prediction = model.predict_classes(data)
+    #predictions have shape (1444,), a prediction for each patch in the image
 
-    print(output_prediction[:50])
-
-    #data_node = tf.constant(data)
-    #output = tf.nn.softmax(model(data_node))
-    #output_prediction = s.run(output)
-    img_prediction = label_to_img(img.shape[0], img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
-
-    return img_prediction
+    return output_prediction
 
 
-def get_predictionimage(filename, image_idx, datatype, model, i, IMG_PATCH_SIZE,PIXEL_DEPTH):
+def get_predictionimage(filename, image_idx, datatype, model, IMG_PATCH_SIZE, PIXEL_DEPTH):
 
+    i = image_idx
+    # Specify the path of the 
     if (datatype == 'train'):
         imageid = "satImage_%.3d" % image_idx
         image_filename = filename + imageid + ".png"
@@ -232,40 +235,61 @@ def get_predictionimage(filename, image_idx, datatype, model, i, IMG_PATCH_SIZE,
     img = mpimg.imread(image_filename)
     #data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
 
-    # Turns the image into its data patches
-    data = numpy.asarray(img_crop(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE))
-    #shape ((38*38), 16,16,3)
+    output_prediction = get_prediction(img, model, IMG_PATCH_SIZE)
+    predict_img = label_to_img(img.shape[0],img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
 
-    # Data now is a vector of the patches from one single image in the testing data
-    output_prediction = model.predict_classes(data)
-    #predictions have shape (1444,), a prediction for each patch in the image
-
-    imgwidth = img.shape[0]
-    imgheight = img.shape[1]
-    w = IMG_PATCH_SIZE
-    h = IMG_PATCH_SIZE
-
-    # Defines the "black white" image that is to be saved
-    predict_img = numpy.zeros([imgwidth, imgheight])
-
-    # Fills image with the predictions for each patch
-    ind = 0
-    for i in range(0,imgheight,h):
-        for j in range(0,imgwidth,w):
-            predict_img[j:j+w, i:i+h] = output_prediction[ind]
-            ind += 1
     
-
-    predict_img_3c = numpy.zeros((w, h, 3), dtype=numpy.uint8)
-    predict_img8 = img_float_to_uint8(predict_img, 255)          
+    # Changes into a 3D array, to easier turn into image
+    predict_img_3c = numpy.zeros((img.shape[0],img.shape[1], 3), dtype=numpy.uint8)
+    predict_img8 = img_float_to_uint8(predict_img, PIXEL_DEPTH)          
     predict_img_3c[:,:,0] = predict_img8
     predict_img_3c[:,:,1] = predict_img8
     predict_img_3c[:,:,2] = predict_img8
 
-
     imgpred = Image.fromarray(predict_img_3c)
 
     return imgpred
+
+
+def make_img_overlay(img, predicted_img, PIXEL_DEPTH):
+    w = img.shape[0]
+    h = img.shape[1]
+    color_mask = numpy.zeros((w, h, 3), dtype=numpy.uint8)
+    color_mask[:,:,0] = predicted_img*PIXEL_DEPTH
+
+    img8 = img_float_to_uint8(img, PIXEL_DEPTH)
+    background = Image.fromarray(img8, 'RGB').convert("RGBA")
+    overlay = Image.fromarray(color_mask, 'RGB').convert("RGBA")
+    new_img = Image.blend(background, overlay, 0.2)
+    return new_img
+
+
+# Get prediction overlaid on the original image for given input file
+def get_prediction_with_overlay(filename, image_idx, datatype, model, IMG_PATCH_SIZE, PIXEL_DEPTH):
+
+    i = image_idx
+    if (datatype == 'train'):
+        imageid = "satImage_%.3d" % image_idx
+        image_filename = filename + imageid + ".png"
+    elif (datatype == 'test'):
+        imageid = "/test_%d" % i
+        image_filename = filename + imageid + imageid + ".png"
+    else:
+        print('Error: Enter test or train')
+
+    img = mpimg.imread(image_filename)
+
+
+    # Returns a vector with a prediction for each patch
+    output_prediction = get_prediction(img, model, IMG_PATCH_SIZE) 
+    
+    # Returns a representation of the image as a 2D vector with a label at each pixel
+    img_prediction = label_to_img(img.shape[0],img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
+    
+
+    oimg = make_img_overlay(img, img_prediction, PIXEL_DEPTH)
+
+    return oimg
 
 
 
