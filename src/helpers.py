@@ -92,7 +92,30 @@ def extract_labels(filename, num_images, IMG_PATCH_SIZE):
     return labels.astype(numpy.float32)
 
 
+def load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE):
 
+    print('\nLoading training images')
+    x_train = extract_data(train_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE,  'train')
+    #print(x_train[:10])
+
+    print('Loading training labels')
+    y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
+    #print(y_train[:20])
+
+    print('Loading test images\n')
+    x_test = extract_data(test_data_filename,TESTING_SIZE, IMG_PATCH_SIZE, 'test')
+    #print(x_test[:10])
+
+    print('Train data shape: ',x_train.shape)
+    print('Train labels shape: ',y_train.shape)
+    print('Test data shape: ',x_test.shape)
+
+    [cl1,cl2] = numpy.sum(y_train, axis = 0, dtype = int)
+    print('Number of samples in class 1 (background): ',cl1)
+    print('Number of samples in class 2 (road): ',cl2, '\n')
+
+
+    return x_train, y_train, x_test
 
 
 
