@@ -115,21 +115,7 @@ def print_predictions(predictions, labels):
     max_predictions = numpy.argmax(predictions, 1)
     print (str(max_labels) + ' ' + str(max_predictions))
 
-# Convert array of labels to an image
-def label_to_img(imgwidth, imgheight, w, h, labels):
-    array_labels = numpy.zeros([imgwidth, imgheight])
-    idx = 0
-    for i in range(0,imgheight,h):
-        for j in range(0,imgwidth,w):
-            if labels[idx][0] > 0.5:
-                l = 1
-            else:
-                l = 0
-            array_labels[j:j+w, i:i+h] = l
-            idx = idx + 1
-    return array_labels
-
-def img_float_to_uint8(img):
+def img_float_to_uint8(img, PIXEL_DEPTH):
     rimg = img - numpy.min(img)
     rimg = (rimg / numpy.max(rimg) * PIXEL_DEPTH).round().astype(numpy.uint8)
     return rimg
@@ -173,3 +159,106 @@ def make_img_binary(img, predicted_img):
     overlay = Image.fromarray(color_mask, 'RGB').convert("RGBA")
     new_img = Image.blend(background, overlay, 0.2)
     return new_img
+
+#######
+
+# Convert array of labels to an image
+def label_to_img(imgwidth, imgheight, w, h, labels):
+    array_labels = numpy.zeros([imgwidth, imgheight])
+
+    #for i in range(0,imgheight,h):
+    #    for j in range(0,imgwidth,w):
+            #if labels[idx][0] > 0.5:
+            #    l = 1
+            #else:
+            #    l = 0
+    #        array_labels[j:j+w, i:i+h] = l
+    #        idx = idx + 1
+    
+    #labels = numpy.array(labels)
+
+    array_labels = numpy.reshape(labels,(-1,int(imgwidth)))
+    print(array_labels.shape)
+
+
+    return array_labels
+
+
+def get_prediction(img, model, IMG_PATCH_SIZE):
+    data = numpy.asarray(img_crop(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE))
+
+    output_prediction = model.predict_classes(data)
+    #print(output_prediction[])
+
+    #data_node = tf.constant(data)
+    #output = tf.nn.softmax(model(data_node))
+    #output_prediction = s.run(output)
+    img_prediction = label_to_img(img.shape[0], img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
+
+    return img_prediction
+
+def get_predictionimage(filename, image_idx, datatype, model, i, IMG_PATCH_SIZE,PIXEL_DEPTH):
+
+    if (datatype == 'train'):
+        imageid = "satImage_%.3d" % image_idx
+        image_filename = filename + imageid + ".png"
+    elif (datatype == 'test'):
+        imageid = "/test_%d" % i
+        image_filename = filename + imageid + imageid + ".png"
+    else:
+        print('Error: Enter test or train')      
+
+    img = mpimg.imread(image_filename)
+
+    img_prediction = get_prediction(img, model, IMG_PATCH_SIZE)
+    img_prediction[img_prediction == 0] = 100
+    img_prediction[img_prediction == 1] = 0
+    img_prediction[img_prediction == 100] = 1
+
+    #print(img_prediction)
+    #cimg = concatenate_images(img, img_prediction)
+
+    nChannels = len(img_prediction.shape)
+    
+    w = img_prediction.shape[0]
+    h = img_prediction.shape[1]
+    if nChannels != 3:
+        img_prediction_3c = numpy.zeros((w, h, 3), dtype=numpy.uint8)
+        img_prediction8 = img_float_to_uint8(img_prediction, PIXEL_DEPTH)          
+        img_prediction_3c[:,:,0] = img_prediction8
+        img_prediction_3c[:,:,1] = img_prediction8
+        img_prediction_3c[:,:,2] = img_prediction8
+
+
+    imgpred = Image.fromarray(img_prediction_3c)
+
+    #filename = prediction_training_dir + "prediction_" + str(i) + ".png"
+    #.save(filename)
+
+    return imgpred
+
+
+
+#########
+
+def pred_to_submission_strings(y_test):
+    """Reads a single image and outputs the strings that should go into the submission file"""
+    img_number = int(re.search(r"\d+", image_filename).group(0))
+    im = mpimg.imread(image_filename)
+    patch_size = 16
+    for j in range(0, im.shape[1], patch_size):
+        for i in range(0, im.shape[0], patch_size):
+            patch = im[i:i + patch_size, j:j + patch_size]
+            label = patch_to_label(patch)
+            yield("{:03d}_{}_{},{}".format(img_number, j, i, label))
+
+
+def pred_to_submission(submission_filename, y_test):
+    """Converts images into a submission file"""
+    with open(submission_filename, 'w') as f:
+        f.write('id,prediction\n')
+        for fn in image_filenames[0:]:
+            f.writelines('{}\n'.format(s) for s in mask_to_submission_strings(fn))
+
+
+
