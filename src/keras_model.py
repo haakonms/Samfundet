@@ -124,20 +124,37 @@ print(sum(y_submit))
 
 image_filenames=[]
 prediction_test_dir = "predictions_test/"
-for i in range(1,TESTING_SIZE+1):
+'''for i in range(1,TESTING_SIZE+1):
     test_data_filename = data_dir + 'test_set_images'
 
     filename = prediction_test_dir + "predictimg_" + str(i) + ".png"
     imgpred = get_predictionimage(test_data_filename, i, 'test', model, i, IMG_PATCH_SIZE, PIXEL_DEPTH)
     imgpred.save(filename)
     #print(filename)
-    image_filenames.append(filename)
+    image_filenames.append(filename)'''
 
 
-submission_filename = 'keras_submission'
-pred_to_submission(submission_filename,*image_filenames)    
+#submission_filename = 'keras_submission'
+#pred_to_submission(submission_filename,*image_filenames)    
 
+with open('submission_keras.csv', 'w') as f:
+        f.write('id,prediction\n')
+        #for i in range(72200):
+        i=0;
+        for j in range(1,50+1):
+          for k in range(0,593,16):
+            for l in range(0,593,16): 
+              strj = ''
+            
+              if len(str(j))<2:
+                strj='00'
+              elif len(str(j))==2:
+                  strj='0'
 
+              text = strj + str(j) + '_' + str(k) + '_' + str(l) + ',' + str(y_submit[i])
+              f.write(text)
+              f.write('\n')
+              i=i+1;
 
 
 
