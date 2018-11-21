@@ -11,7 +11,7 @@ from helpers import *
 
 import code
 import tensorflow.python.platform
-import numpy
+import numpy 
 import tensorflow as tf
 
 import keras
@@ -23,6 +23,8 @@ from keras.utils import np_utils
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
+from sklearn.utils import class_weight
+
 
 NUM_CHANNELS = 3 # RGB images
 PIXEL_DEPTH = 255
@@ -32,7 +34,7 @@ TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 5
+NUM_EPOCHS = 20
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 
@@ -53,6 +55,7 @@ x_train = extract_data(train_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE,  'tra
 
 print('Loading training labels')
 y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
+#print(y_train[:20])
 
 print('Loading test images\n')
 x_test = extract_data(test_data_filename,TESTING_SIZE, IMG_PATCH_SIZE, 'test')
@@ -62,7 +65,13 @@ print('Train data shape: ',x_train.shape)
 print('Train labels shape: ',y_train.shape)
 print('Test data shape: ',x_test.shape)
 
+[cl1,cl2] = numpy.sum(y_train, axis = 0, dtype = int)
+print('Number of samples in class 1 (background): ',cl1)
+print('Number of samples in class 2 (road): ',cl2, '\n')
 
+
+
+# Increase the dataset
 train_datagen = ImageDataGenerator(
         shear_range=0.2,
         zoom_range=0.2,
@@ -83,9 +92,15 @@ validation_generator = test_datagen.flow(
     )
 
 
+# Class weigths
+classes = np.array([0,1])
+class_weights = class_weight.compute_class_weight('balanced',classes,y_train[:,1])
+
+
+
 # input image dimensions
-img_rows, img_cols = 16, 16
-input_shape = (img_rows, img_cols, 3) # eller 3 på siste, for RGB channels?
+img_rows, img_cols = BATCH_SIZE, BATCH_SIZE
+input_shape = (img_rows, img_cols, NUM_CHANNELS) 
 
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
@@ -111,7 +126,8 @@ model.fit(x_train, y_train,
           epochs=NUM_EPOCHS,
           shuffle = True,
           verbose=1,
-          validation_split = 0.2)
+          validation_split = 0.1,
+          class_weight = class_weights)
           #validation_data=(x_test, y_test))
 #score = model.evaluate(x_test, y_test, verbose=0)
 #print('Test loss:', score[0])
