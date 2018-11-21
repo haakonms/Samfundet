@@ -121,16 +121,19 @@ y_submit = model.predict_classes(x_test)
 print(y_submit.shape)
 print(sum(y_submit))
 
-image_filenames=[]
+#image_filenames=[]
 prediction_test_dir = "predictions_test/"
 for i in range(1,TESTING_SIZE+1):
     test_data_filename = data_dir + 'test_set_images'
 
+    oimg = get_prediction_with_overlay(test_data_filename, i, 'test', model, IMG_PATCH_SIZE, PIXEL_DEPTH)
+    oimg.save(prediction_test_dir + "overlay_" + str(i) + ".png")
+
     filename = prediction_test_dir + "predictimg_" + str(i) + ".png"
-    imgpred = get_predictionimage(test_data_filename, i, 'test', model, i, IMG_PATCH_SIZE, PIXEL_DEPTH)
+    imgpred = get_predictionimage(test_data_filename, i, 'test', model, IMG_PATCH_SIZE, PIXEL_DEPTH)
     imgpred.save(filename)
     #print(filename)
-    image_filenames.append(filename)
+    #image_filenames.append(filename)
 
 
 #submission_filename = 'keras_submission'
