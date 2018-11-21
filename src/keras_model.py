@@ -5,14 +5,17 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import sys
 import urllib
 import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 from PIL import Image
 from mask_to_submission import *
+from tf_aerial_images import *
 from helpers import *
 
 import code
 import tensorflow.python.platform
-import numpy
+import numpy as np
 import tensorflow as tf
+from scipy import misc, ndimage
 
 
 import keras
@@ -24,6 +27,7 @@ from keras.utils import np_utils
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
+from pathlib import Path
 
 
 NUM_CHANNELS = 3 # RGB images
@@ -37,6 +41,7 @@ BATCH_SIZE = 16 # 64
 NUM_EPOCHS = 5
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
+MAX_AUG = 10
 
 # Set image patch size in pixels
 # IMG_PATCH_SIZE should be a multiple of 4
@@ -50,12 +55,101 @@ train_data_filename = data_dir + 'training/images/'
 train_labels_filename = data_dir + 'training/groundtruth/' 
 test_data_filename = data_dir + 'test_set_images'
 
+#############################################
+seed = 0
+datagenImg = ImageDataGenerator(
+        rotation_range=20, #in radians
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.25,
+        zoom_range=0.2,
+        channel_shift_range=10,
+        horizontal_flip=True,
+        vertical_flip=True)
+datagenGT = ImageDataGenerator(
+        rotation_range=20, #in radians
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.25,
+        zoom_range=0.2,
+        channel_shift_range=10,
+        horizontal_flip=True,
+        vertical_flip=True)
+
+data_gen_args = dict(featurewise_center=True,
+                     featurewise_std_normalization=True,
+                     rotation_range=90,
+                     width_shift_range=0.1,
+                     height_shift_range=0.1,
+                     shear_range=0.15,
+                     zoom_range=0.1,
+                     channel_shift_range=10,
+                     horizontal_flip=True,
+                     vertical_flip=True)
+imgDir = data_dir + 'training/augmented/images'
+groundThruthDir = data_dir + 'training/augmented/groundthruth'
+
+# Create target directory & all intermediate directories if don't exists
+try:
+  os.makedirs(imgDir)
+  os.makedirs(groundThruthDir)
+  print("Directory " , imgDir ,  " Created ")
+except FileExistsError:
+    print("Directory " , imgDir ,  " already exists")  
+
+
+image_datagen = ImageDataGenerator(**data_gen_args)
+ground_thruth_datagen = ImageDataGenerator(**data_gen_args)
+for i in range(1,TRAINING_SIZE+1):
+  imageid = "satImage_%.3d" % i
+  image_filename = train_data_filename + imageid + ".png"
+  groundthruth_filename = train_labels_filename + imageid + ".png"
+  trainImg = load_img(image_filename)
+  trainLabel = load_img(groundthruth_filename)
+  img_arr = img_to_array(trainImg)
+  img_arr = img_arr.reshape((1,) + img_arr.shape)
+  gT_arr = img_to_array(trainLabel)
+  gT_arr = gT_arr.reshape((1,) + gT_arr.shape)
+  #for j in range(5):
+    #image_datagen.flow_from_directory(img_arr,batch_size=1, save_to_dir=imgDir, save_prefix=imageid,save_format='png', seed=j)
+    #ground_thruth_datagen.flow_from_directory(gT_arr,batch_size=1, save_to_dir=groundThruthDir, save_prefix=imageid,save_format='png', seed=j)
+  j = 0
+  for batch in datagenImg.flow(
+    img_arr,
+    batch_size=1, 
+    save_to_dir=imgDir, 
+    save_prefix=imageid,
+    save_format='png', 
+    seed=j):
+    j +=1
+    if j>=MAX_AUG:
+      break
+  j = 0
+  for batch in datagenGT.flow(
+    gT_arr,
+    batch_size=1, 
+    save_to_dir=groundThruthDir, 
+    save_prefix=imageid,
+    save_format='png', 
+    seed=j):
+    j +=1
+    if j>MAX_AUG:
+      break
+
+
+
+
+
+
 print('\nLoading training images')
-x_train = extract_data(train_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE,  'train')
+#x_train = extract_data(train_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE,  'train')
 #print(x_train[:10])
 
 print('Loading training labels')
-y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
+#y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
+
+
+x_train, y_train = extract_aug_data_and_labels(imgDir, TRAINING_SIZE*MAX_AUG, IMG_PATCH_SIZE)
 
 print('Loading test images\n')
 x_test = extract_data(test_data_filename,TESTING_SIZE, IMG_PATCH_SIZE, 'test')
@@ -66,19 +160,34 @@ print('Train labels shape: ',y_train.shape)
 print('Test data shape: ',x_test.shape)
 
 
+
 train_datagen = ImageDataGenerator(
-        shear_range=0.2,
-        zoom_range=0.2,
+        rotation_range=10, #in radians
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        shear_range=0.15,
+        zoom_range=0.1,
+        channel_shift_range=10,
         horizontal_flip=True,
         vertical_flip=True)
 
 test_datagen = ImageDataGenerator()
 
-train_generator = train_datagen.flow(
+'''x_batch, y_batch = train_datagen.flow(x_train, y_train, batch_size=9).next()
+x_train.append(x_batch)
+y_train.append(y_batch)
+print('Train data shape: ',x_train.shape)
+print('Train labels shape: ',y_train.shape)'''
+
+'''X_batch, y_batch = train_datagen.flow(
 	x=x_train, 
 	y=y_train,
-	batch_size = BATCH_SIZE
-	)
+	batch_size = 2
+	)'''
+train_datagen.fit(x_train)
+
+
+#fit_generator(train_datagen, samples_per_epoch=len(train), epochs=10)
 
 validation_generator = test_datagen.flow(
     x=x_test,
@@ -113,10 +222,12 @@ model.fit(x_train, y_train,
           shuffle = True,
           verbose=1,
           validation_split = 0.2)
-          #validation_data=(x_test, y_test))
+          #validation_data=(x_test, y_test))'''
 #score = model.evaluate(x_test, y_test, verbose=0)
 #print('Test loss:', score[0])
 #print('Test accuracy:', score[1])
+'''model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
+                    steps_per_epoch=25000, epochs=NUM_EPOCHS, verbose=1)'''
 
 y_submit = model.predict_classes(x_test)
 print(y_submit.shape)
