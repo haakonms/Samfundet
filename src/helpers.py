@@ -58,9 +58,14 @@ def extract_data(filename, num_images, IMG_PATCH_SIZE, datatype):
     IMG_HEIGHT = imgs[0].shape[1]
     N_PATCHES_PER_IMAGE = (IMG_WIDTH/IMG_PATCH_SIZE)*(IMG_HEIGHT/IMG_PATCH_SIZE)
 
+    # makes a list of all patches for the image at each index
     img_patches = [img_crop(imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
+    # "unpacks" the vectors for each image into a shared vector, where the entire vector for image 1 comes
+    # befor the entire vector for image 2
+    # i = antall bilder, j = hvilken patch
     data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
 
+    #shape of returned = (width_image/num_patches * height_image/num_patches*num_images), patch_size, patch_size, 3
     return numpy.asarray(data)
 
 
@@ -176,6 +181,16 @@ def label_to_img(imgwidth, imgheight, w, h, labels):
     #        idx = idx + 1
     
     #labels = numpy.array(labels)
+    ind = 0
+    for i in range(0,imgheight,h):
+        for j in range(0,imgwidth,w):
+            array_labels[j:j+w, i:i+h] = labels[ind]
+            #list_patches.append(im_patch)
+            ind += 1
+    
+    return array_labels
+
+
 
     array_labels = numpy.reshape(labels,(-1,int(imgwidth)))
     print(array_labels.shape)
@@ -186,9 +201,13 @@ def label_to_img(imgwidth, imgheight, w, h, labels):
 
 def get_prediction(img, model, IMG_PATCH_SIZE):
     data = numpy.asarray(img_crop(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE))
+    print('\n\nhei')
+    print(data.shape)
+    print(data[:1])
 
     output_prediction = model.predict_classes(data)
-    #print(output_prediction[])
+
+    print(output_prediction[:50])
 
     #data_node = tf.constant(data)
     #output = tf.nn.softmax(model(data_node))
@@ -196,6 +215,7 @@ def get_prediction(img, model, IMG_PATCH_SIZE):
     img_prediction = label_to_img(img.shape[0], img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
 
     return img_prediction
+
 
 def get_predictionimage(filename, image_idx, datatype, model, i, IMG_PATCH_SIZE,PIXEL_DEPTH):
 
@@ -208,32 +228,42 @@ def get_predictionimage(filename, image_idx, datatype, model, i, IMG_PATCH_SIZE,
     else:
         print('Error: Enter test or train')      
 
+    # loads the image in question
     img = mpimg.imread(image_filename)
+    #data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
 
-    img_prediction = get_prediction(img, model, IMG_PATCH_SIZE)
-    img_prediction[img_prediction == 0] = 100
-    img_prediction[img_prediction == 1] = 0
-    img_prediction[img_prediction == 100] = 1
+    # Turns the image into its data patches
+    data = numpy.asarray(img_crop(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE))
+    #shape ((38*38), 16,16,3)
 
-    #print(img_prediction)
-    #cimg = concatenate_images(img, img_prediction)
+    # Data now is a vector of the patches from one single image in the testing data
+    output_prediction = model.predict_classes(data)
+    #predictions have shape (1444,), a prediction for each patch in the image
 
-    nChannels = len(img_prediction.shape)
+    imgwidth = img.shape[0]
+    imgheight = img.shape[1]
+    w = IMG_PATCH_SIZE
+    h = IMG_PATCH_SIZE
+
+    # Defines the "black white" image that is to be saved
+    predict_img = numpy.zeros([imgwidth, imgheight])
+
+    # Fills image with the predictions for each patch
+    ind = 0
+    for i in range(0,imgheight,h):
+        for j in range(0,imgwidth,w):
+            predict_img[j:j+w, i:i+h] = output_prediction[ind]
+            ind += 1
     
-    w = img_prediction.shape[0]
-    h = img_prediction.shape[1]
-    if nChannels != 3:
-        img_prediction_3c = numpy.zeros((w, h, 3), dtype=numpy.uint8)
-        img_prediction8 = img_float_to_uint8(img_prediction, PIXEL_DEPTH)          
-        img_prediction_3c[:,:,0] = img_prediction8
-        img_prediction_3c[:,:,1] = img_prediction8
-        img_prediction_3c[:,:,2] = img_prediction8
+
+    predict_img_3c = numpy.zeros((w, h, 3), dtype=numpy.uint8)
+    predict_img8 = img_float_to_uint8(predict_img, 255)          
+    predict_img_3c[:,:,0] = predict_img8
+    predict_img_3c[:,:,1] = predict_img8
+    predict_img_3c[:,:,2] = predict_img8
 
 
-    imgpred = Image.fromarray(img_prediction_3c)
-
-    #filename = prediction_training_dir + "prediction_" + str(i) + ".png"
-    #.save(filename)
+    imgpred = Image.fromarray(predict_img_3c)
 
     return imgpred
 

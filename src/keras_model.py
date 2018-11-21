@@ -34,7 +34,7 @@ TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 1
+NUM_EPOCHS = 5
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 
@@ -86,14 +86,6 @@ validation_generator = test_datagen.flow(
     )
 
 
-
-
-
-
-#batch_size = 16
-#num_classes = 2
-#epochs = 20
-
 # input image dimensions
 img_rows, img_cols = 16, 16
 input_shape = (img_rows, img_cols, 3) # eller 3 på siste, for RGB channels?
@@ -120,29 +112,32 @@ model.fit(x_train, y_train,
           epochs=NUM_EPOCHS,
           shuffle = True,
           verbose=1,
-          validation_split = 0.9)
+          validation_split = 0.2)
           #validation_data=(x_test, y_test))
 #score = model.evaluate(x_test, y_test, verbose=0)
 #print('Test loss:', score[0])
 #print('Test accuracy:', score[1])
 
-"""image_filenames=[]
+y_submit = model.predict_classes(x_test)
+print(y_submit.shape)
+print(sum(y_submit))
+
+image_filenames=[]
 prediction_test_dir = "predictions_test/"
 for i in range(1,TESTING_SIZE+1):
-    test_data_filename = data_dir + 'test_set_images/'
+    test_data_filename = data_dir + 'test_set_images'
 
     filename = prediction_test_dir + "predictimg_" + str(i) + ".png"
     imgpred = get_predictionimage(test_data_filename, i, 'test', model, i, IMG_PATCH_SIZE, PIXEL_DEPTH)
     imgpred.save(filename)
-    print(filename)
+    #print(filename)
     image_filenames.append(filename)
 
 
 submission_filename = 'keras_submission'
-masks_to_submission(submission_filename,*image_filenames)    """
+pred_to_submission(submission_filename,*image_filenames)    
 
-y_submit = model.predict_classes(x_test)
-print(y_submit.shape)
+
 
 
 
