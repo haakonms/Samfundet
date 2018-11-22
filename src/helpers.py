@@ -50,6 +50,7 @@ def extract_data(filename, num_images, IMG_PATCH_SIZE, datatype):
         if os.path.isfile(image_filename):
             #print ('Loading ' + image_filename)
             img = mpimg.imread(image_filename)
+            print(img.shape)
             imgs.append(img)
         else:
             print ('File ' + image_filename + ' does not exist')
@@ -82,13 +83,14 @@ def extract_aug_data_and_labels(filename, num_images, img_patch_s):
     for path in pathlist:
         # because path is object not string
         image_path = str(path)
-        #lhs,rhs = image_path.split("/images")
+        lhs,rhs = image_path.split("/images")
 
         print("lhs",lhs,"rhs",rhs)
         img = mpimg.imread(image_path)
         imgs.append(img)
         gt_path = lhs + '/groundtruth' + rhs
         g_img = mpimg.imread(gt_path)
+        print(img.shape)
         gt_imgs.append(g_img)
 
 
@@ -117,6 +119,7 @@ def extract_labels(filename, num_images, IMG_PATCH_SIZE):
             #print ('Loading ' + image_filename)
             img = mpimg.imread(image_filename)
             gt_imgs.append(img)
+            print(img.shape)
         else:
             print ('File ' + image_filename + ' does not exist')
 

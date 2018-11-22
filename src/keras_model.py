@@ -127,11 +127,13 @@ for i in range(1,TRAINING_SIZE+1):
   image_filename = train_data_filename + imageid + ".png"
   groundthruth_filename = train_labels_filename + imageid + ".png"
   trainImg = load_img(image_filename)
-  trainLabel = load_img(groundthruth_filename)
+  trainLabel = load_img(groundthruth_filename,color_mode='grayscale')
+  #print(trainLabel.shape)
   img_arr = img_to_array(trainImg)
   img_arr = img_arr.reshape((1,) + img_arr.shape)
   gT_arr = img_to_array(trainLabel)
   gT_arr = gT_arr.reshape((1,) + gT_arr.shape)
+  #print(gT_arr.shape)
   #for j in range(5):
     #image_datagen.flow_from_directory(img_arr,batch_size=1, save_to_dir=imgDir, save_prefix=imageid,save_format='png', seed=j)
     #ground_thruth_datagen.flow_from_directory(gT_arr,batch_size=1, save_to_dir=groundThruthDir, save_prefix=imageid,save_format='png', seed=j)
@@ -162,7 +164,7 @@ for i in range(1,TRAINING_SIZE+1):
 
 # Loading the data, and set wheter it is to be augmented or not
 x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE, 
-          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir) # The last 3 parameters can be blank when we dont want augmentation
+          augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir) # The last 3 parameters can be blank when we dont want augmentation
 
 
 
