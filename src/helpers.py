@@ -50,7 +50,6 @@ def extract_data(filename, num_images, IMG_PATCH_SIZE, datatype):
         if os.path.isfile(image_filename):
             #print ('Loading ' + image_filename)
             img = mpimg.imread(image_filename)
-            print(img.shape)
             imgs.append(img)
         else:
             print ('File ' + image_filename + ' does not exist')
@@ -66,12 +65,12 @@ def extract_data(filename, num_images, IMG_PATCH_SIZE, datatype):
     # befor the entire vector for image 2
     # i = antall bilder, j = hvilken patch
     data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
-
+    #print("data",data.shape)
     #shape of returned = (width_image/num_patches * height_image/num_patches*num_images), patch_size, patch_size, 3
     return numpy.asarray(data)
 
 
-def extract_aug_data_and_labels(filename, num_images, img_patch_s):
+def extract_aug_data_and_labels(filename, num_images, IMG_PATCH_SIZE):
     """Extract the images into a 4D tensor [image index, y, x, channels].
     Values are rescaled from [0, 255] down to [-0.5, 0.5].
     """
@@ -84,28 +83,28 @@ def extract_aug_data_and_labels(filename, num_images, img_patch_s):
         # because path is object not string
         image_path = str(path)
         lhs,rhs = image_path.split("/images")
-
-        print("lhs",lhs,"rhs",rhs)
         img = mpimg.imread(image_path)
         imgs.append(img)
         gt_path = lhs + '/groundtruth' + rhs
         g_img = mpimg.imread(gt_path)
-        print(img.shape)
         gt_imgs.append(g_img)
 
 
     num_images = len(imgs)
     IMG_WIDTH = imgs[0].shape[0]
     IMG_HEIGHT = imgs[0].shape[1]
-    N_PATCHES_PER_IMAGE = (IMG_WIDTH/img_patch_s)*(IMG_HEIGHT/img_patch_s)
-
-    img_patches = [img_crop(imgs[i], img_patch_s, img_patch_s) for i in range(num_images)]
+    N_PATCHES_PER_IMAGE = (IMG_WIDTH/IMG_PATCH_SIZE)*(IMG_HEIGHT/IMG_PATCH_SIZE)
+    # makes a list of all patches for the image at each index
+    img_patches = [img_crop(imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
+    # "unpacks" the vectors for each image into a shared vector, where the entire vector for image 1 comes
+    # befor the entire vector for image 2
+    # i = antall bilder, j = hvilken patch
     data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
-    gt_patches = [img_crop(gt_imgs[i], img_patch_s, img_patch_s) for i in range(num_images)]
-    data = numpy.asarray([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
-    labels = numpy.asarray([value_to_class(numpy.mean(data[i])) for i in range(len(data))])
+    gt_patches = [img_crop(gt_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
+    data_gt = numpy.asarray([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
+    labels = numpy.asarray([value_to_class(numpy.mean(data_gt[i])) for i in range(len(data_gt))])
 
-    return numpy.asarray(data),labels.astype(numpy.float32)
+    return numpy.asarray(data), labels.astype(numpy.float32)
 
 
 # Extract label images
@@ -119,7 +118,6 @@ def extract_labels(filename, num_images, IMG_PATCH_SIZE):
             #print ('Loading ' + image_filename)
             img = mpimg.imread(image_filename)
             gt_imgs.append(img)
-            print(img.shape)
         else:
             print ('File ' + image_filename + ' does not exist')
 
