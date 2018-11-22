@@ -315,4 +315,26 @@ def pred_to_submission(submission_filename, y_test):
             f.writelines('{}\n'.format(s) for s in mask_to_submission_strings(fn))
 
 
+def prediction_to_submission(filename, y_submit):
+    with open(filename, 'w') as f:
+        f.write('id,prediction\n')
+        #for i in range(72200):
+        i=0;
+        for j in range(1,50+1):
+          for k in range(0,593,16):
+            for l in range(0,593,16): 
+              strj = ''
+            
+              if len(str(j))<2:
+                strj='00'
+              elif len(str(j))==2:
+                  strj='0'
+
+              text = strj + str(j) + '_' + str(k) + '_' + str(l) + ',' + str(y_submit[i])
+              f.write(text)
+              f.write('\n')
+              i=i+1;
+
+
+
 
