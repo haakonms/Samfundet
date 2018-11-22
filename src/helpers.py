@@ -7,6 +7,7 @@ import urllib
 import numpy
 import matplotlib.image as mpimg
 from PIL import Image
+from pathlib import Path
 
 
 def img_crop(im, w, h):
@@ -68,7 +69,8 @@ def extract_data(filename, num_images, IMG_PATCH_SIZE, datatype):
     #shape of returned = (width_image/num_patches * height_image/num_patches*num_images), patch_size, patch_size, 3
     return numpy.asarray(data)
 
-    def extract_aug_data_and_labels(filename, num_images, img_patch_s):
+
+def extract_aug_data_and_labels(filename, num_images, img_patch_s):
     """Extract the images into a 4D tensor [image index, y, x, channels].
     Values are rescaled from [0, 255] down to [-0.5, 0.5].
     """
@@ -126,16 +128,20 @@ def extract_labels(filename, num_images, IMG_PATCH_SIZE):
     return labels.astype(numpy.float32)
 
 
-def load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE):
+def load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir=''):
 
-    print('\nLoading training images')
-    x_train = extract_data(train_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE,  'train')
-    #print(x_train[:10])
+    if augment == False:
+        print('\nLoading training images')
+        x_train = extract_data(train_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE,  'train')
+        #print(x_train[:10])
 
-    print('Loading training labels')
-    y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
-    #print(y_train[:20])
+        print('Loading training labels')
+        y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
+        #print(y_train[:20])
+    elif augment == True:
+        x_train, y_train = extract_aug_data_and_labels(augImgDir, TRAINING_SIZE*MAX_AUG, IMG_PATCH_SIZE)
 
+    
     print('Loading test images\n')
     x_test = extract_data(test_data_filename,TESTING_SIZE, IMG_PATCH_SIZE, 'test')
     #print(x_test[:10])

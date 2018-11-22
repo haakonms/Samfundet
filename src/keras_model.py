@@ -56,7 +56,6 @@ data_dir = 'data/'
 train_data_filename = data_dir + 'training/images/'
 train_labels_filename = data_dir + 'training/groundtruth/' 
 test_data_filename = data_dir + 'test_set_images'
-x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE)
 
 
 #############################################
@@ -142,34 +141,14 @@ for i in range(1,TRAINING_SIZE+1):
 
 
 
-
-
-
-print('\nLoading training images')
-#x_train = extract_data(train_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE,  'train')
-#print(x_train[:10])
-
-print('Loading training labels')
-#y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
-
-
-x_train, y_train = extract_aug_data_and_labels(imgDir, TRAINING_SIZE*MAX_AUG, IMG_PATCH_SIZE)
-
-print('Loading test images\n')
-x_test = extract_data(test_data_filename,TESTING_SIZE, IMG_PATCH_SIZE, 'test')
-#print(x_test[:10])
-
-print('Train data shape: ',x_train.shape)
-print('Train labels shape: ',y_train.shape)
-print('Test data shape: ',x_test.shape)
-
-
+# Loading the data, and set wheter it is to be augmented or not
+x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE, 
+          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir) # The last 3 parameters can be blank when we dont want augmentation
 
 
 
 
 # Increase the dataset
-
 train_datagen = ImageDataGenerator(
         rotation_range=10, #in radians
         width_shift_range=0.1,
@@ -209,7 +188,6 @@ classes = np.array([0,1])
 class_weights = class_weight.compute_class_weight('balanced',classes,y_train[:,1])
 
 
-
 # input image dimensions
 img_rows, img_cols = BATCH_SIZE, BATCH_SIZE
 input_shape = (img_rows, img_cols, NUM_CHANNELS) 
@@ -246,6 +224,7 @@ model.fit(x_train, y_train,
 #print('Test accuracy:', score[1])
 '''model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
                     steps_per_epoch=25000, epochs=NUM_EPOCHS, verbose=1)'''
+
 
 y_submit = model.predict_classes(x_test)
 print(y_submit.shape)
