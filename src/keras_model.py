@@ -2,6 +2,8 @@ from __future__ import print_function
 import gzip
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import glob
+import shutil
 import sys
 import urllib
 import matplotlib.image as mpimg
@@ -41,10 +43,10 @@ TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 20
+NUM_EPOCHS = 5
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
-MAX_AUG = 10
+MAX_AUG = 4
 
 # The size of the patches each image is split into. Should be a multiple of 4, and the image
 # size would be a multiple of this. For this assignment to get the delivery correct it has to be 16
@@ -61,23 +63,25 @@ test_data_filename = data_dir + 'test_set_images'
 #############################################
 seed = 0
 datagenImg = ImageDataGenerator(
-        rotation_range=20, #in radians
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        shear_range=0.25,
-        zoom_range=0.2,
-        channel_shift_range=10,
-        horizontal_flip=True,
-        vertical_flip=True)
+        rotation_range=90, #in radians
+        zoom_range=0.1,
+        vertical_flip=True,
+        fill_mode= 'reflect')
+        #horizontal_flip=True,
+        #shear_range=0.25,
+        #width_shift_range=0.2,
+        #height_shift_range=0.2,
+        #channel_shift_range=10,
 datagenGT = ImageDataGenerator(
-        rotation_range=20, #in radians
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        shear_range=0.25,
-        zoom_range=0.2,
-        channel_shift_range=10,
-        horizontal_flip=True,
-        vertical_flip=True)
+        rotation_range=90, #in radians
+        zoom_range=0.1,
+        vertical_flip=True,
+        fill_mode= 'reflect')
+        #horizontal_flip=True,
+        #shear_range=0.25,
+        #width_shift_range=0.2,
+        #height_shift_range=0.2,
+        #channel_shift_range=10,
 
 data_gen_args = dict(featurewise_center=True,
                      featurewise_std_normalization=True,
@@ -90,7 +94,7 @@ data_gen_args = dict(featurewise_center=True,
                      horizontal_flip=True,
                      vertical_flip=True)
 imgDir = data_dir + 'training/augmented/images'
-groundThruthDir = data_dir + 'training/augmented/groundthruth'
+groundThruthDir = data_dir + 'training/augmented/groundtruth'
 
 # Create target directory & all intermediate directories if don't exists
 try:
@@ -101,8 +105,23 @@ except FileExistsError:
     print("Directory " , imgDir ,  " already exists")  
 
 
+
+
+
 image_datagen = ImageDataGenerator(**data_gen_args)
 ground_thruth_datagen = ImageDataGenerator(**data_gen_args)
+
+#moving original pictures to augmentet position
+for i in range(1, TRAINING_SIZE+1):
+  imageid = "satImage_%.3d" % i
+  image_filename = train_data_filename + imageid + ".png"
+  gt_filename = train_labels_filename + imageid + ".png"
+  image_dest = imgDir + "/" + imageid + ".png"
+  gt_dest = groundThruthDir + "/" + imageid + ".png"
+  #print(image_dest,gt_dest)
+  shutil.copyfile(image_filename, image_dest)
+  shutil.copyfile(gt_filename, gt_dest)
+
 for i in range(1,TRAINING_SIZE+1):
   imageid = "satImage_%.3d" % i
   image_filename = train_data_filename + imageid + ".png"
@@ -136,7 +155,7 @@ for i in range(1,TRAINING_SIZE+1):
     save_format='png', 
     seed=j):
     j +=1
-    if j>MAX_AUG:
+    if j>=MAX_AUG:
       break
 
 

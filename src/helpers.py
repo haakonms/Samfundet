@@ -83,10 +83,11 @@ def extract_aug_data_and_labels(filename, num_images, img_patch_s):
         # because path is object not string
         image_path = str(path)
         lhs,rhs = image_path.split("/images")
-        #print("lhs",lhs,"rhs",rhs)
+
+        print("lhs",lhs,"rhs",rhs)
         img = mpimg.imread(image_path)
         imgs.append(img)
-        gt_path = lhs + '/groundthruth' + rhs
+        gt_path = lhs + '/groundtruth' + rhs
         g_img = mpimg.imread(gt_path)
         gt_imgs.append(g_img)
 
@@ -139,7 +140,7 @@ def load_data(train_data_filename, train_labels_filename, test_data_filename, TR
         y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
         #print(y_train[:20])
     elif augment == True:
-        x_train, y_train = extract_aug_data_and_labels(augImgDir, TRAINING_SIZE*MAX_AUG, IMG_PATCH_SIZE)
+        x_train, y_train = extract_aug_data_and_labels(augImgDir, TRAINING_SIZE*(MAX_AUG+1), IMG_PATCH_SIZE)
 
     
     print('Loading test images\n')
