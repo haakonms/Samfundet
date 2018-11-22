@@ -8,7 +8,6 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from PIL import Image
 from mask_to_submission import *
-from tf_aerial_images import *
 from helpers import *
 
 import code
