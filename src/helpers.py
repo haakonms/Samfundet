@@ -82,7 +82,7 @@ def extract_aug_data_and_labels(filename, num_images, img_patch_s):
     for path in pathlist:
         # because path is object not string
         image_path = str(path)
-        lhs,rhs = image_path.split("/images")
+        #lhs,rhs = image_path.split("/images")
 
         print("lhs",lhs,"rhs",rhs)
         img = mpimg.imread(image_path)
