@@ -13,11 +13,9 @@ from helpers import *
 
 import code
 import tensorflow.python.platform
-<<<<<<< HEAD
+
 import numpy as np
-=======
-import numpy 
->>>>>>> 745bb0bc065f1921e5ea57c6d67cadc143df7f34
+
 import tensorflow as tf
 from scipy import misc, ndimage
 
@@ -30,11 +28,10 @@ from keras.utils import np_utils
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
-<<<<<<< HEAD
+
 from pathlib import Path
-=======
 from sklearn.utils import class_weight
->>>>>>> 745bb0bc065f1921e5ea57c6d67cadc143df7f34
+
 
 
 NUM_CHANNELS = 3 # RGB images
@@ -62,7 +59,7 @@ train_labels_filename = data_dir + 'training/groundtruth/'
 test_data_filename = data_dir + 'test_set_images'
 x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE)
 
-<<<<<<< HEAD
+
 #############################################
 seed = 0
 datagenImg = ImageDataGenerator(
@@ -169,11 +166,11 @@ print('Test data shape: ',x_test.shape)
 
 
 
-=======
+
 
 
 # Increase the dataset
->>>>>>> 745bb0bc065f1921e5ea57c6d67cadc143df7f34
+
 train_datagen = ImageDataGenerator(
         rotation_range=10, #in radians
         width_shift_range=0.1,
@@ -242,14 +239,9 @@ model.fit(x_train, y_train,
           epochs=NUM_EPOCHS,
           shuffle = True,
           verbose=1,
-<<<<<<< HEAD
-          validation_split = 0.2)
-          #validation_data=(x_test, y_test))'''
-=======
           validation_split = 0.1,
           class_weight = class_weights)
           #validation_data=(x_test, y_test))
->>>>>>> 745bb0bc065f1921e5ea57c6d67cadc143df7f34
 #score = model.evaluate(x_test, y_test, verbose=0)
 #print('Test loss:', score[0])
 #print('Test accuracy:', score[1])
