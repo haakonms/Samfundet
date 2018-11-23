@@ -166,42 +166,6 @@ x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename,
 
 
 
-
-# Increase the dataset
-'''train_datagen = ImageDataGenerator(
-        rotation_range=10, #in radians
-        width_shift_range=0.1,
-        height_shift_range=0.1,
-        shear_range=0.15,
-        zoom_range=0.1,
-        channel_shift_range=10,
-        horizontal_flip=True,
-        vertical_flip=True)'''
-
-#test_datagen = ImageDataGenerator()
-
-'''x_batch, y_batch = train_datagen.flow(x_train, y_train, batch_size=9).next()
-x_train.append(x_batch)
-y_train.append(y_batch)
-print('Train data shape: ',x_train.shape)
-print('Train labels shape: ',y_train.shape)'''
-
-'''X_batch, y_batch = train_datagen.flow(
-	x=x_train, 
-	y=y_train,
-	batch_size = 2
-	)'''
-#train_datagen.fit(x_train)
-
-
-#fit_generator(train_datagen, samples_per_epoch=len(train), epochs=10)
-'''
-validation_generator = test_datagen.flow(
-    x=x_test,
-    batch_size=BATCH_SIZE,
-    )
-'''
-
 # Class weigths
 classes = np.array([0,1])
 class_weights = class_weight.compute_class_weight('balanced',classes,y_train[:,1])
@@ -212,15 +176,17 @@ img_rows, img_cols = BATCH_SIZE, BATCH_SIZE
 input_shape = (img_rows, img_cols, NUM_CHANNELS) 
 
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
+model.add(Conv2D(32, kernel_size=(2, 2),
                  activation='relu',
-                 input_shape=input_shape)) #32 is number of outputs from that layer, kernel_size is filter size, 
+                 input_shape=input_shape, padding="same")) #32 is number of outputs from that layer, kernel_size is filter size, 
 #model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
+model.add(Conv2D(64, (3, 3), activation='relu', padding="same"))
+model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
+model.add(Conv2D(64*2, (5, 5), activation='relu', padding="same"))
+model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
 model.add(Flatten())
-model.add(Dense(128, activation='relu'))
+model.add(Dense(128*2, activation='relu'))
 #model.add(Dropout(0.5))
 model.add(Dense(NUM_LABELS, activation='softmax'))
 
