@@ -237,6 +237,7 @@ def extract_labels(filename, num_images, IMG_PATCH_SIZE):
 def load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundThruthDir=''):
 
     if augment == False:
+        print('No augmenting of traing images')
         print('\nLoading training images')
         x_train = extract_data(train_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE,  'train')
         #print(x_train[:10])
@@ -245,6 +246,7 @@ def load_data(train_data_filename, train_labels_filename, test_data_filename, TR
         y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
         #print(y_train[:20])
     elif augment == True:
+        print('Augmenting traing images...')
         augmentation(data_dir, augImgDir, groundThruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG)
         x_train, y_train = extract_aug_data_and_labels(augImgDir, TRAINING_SIZE*(MAX_AUG+1), IMG_PATCH_SIZE)
 

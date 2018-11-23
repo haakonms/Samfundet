@@ -131,8 +131,8 @@ model.fit(x_train, y_train,
 
 
 y_submit = model.predict_classes(x_test)
-print(y_submit.shape)
-print(sum(y_submit))
+print('Size of predictions: ',y_submit.shape)
+print('Number of road patches: ',sum(y_submit))
 
 
 prediction_training_dir = "predictions_training/"
