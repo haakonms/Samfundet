@@ -19,6 +19,7 @@ import numpy as np
 
 import tensorflow as tf
 from scipy import misc, ndimage
+import shutil
 
 import keras
 #from keras.datasets import mnist
@@ -46,7 +47,7 @@ BATCH_SIZE = 16 # 64
 NUM_EPOCHS = 5
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
-MAX_AUG = 4
+MAX_AUG = 2
 
 # The size of the patches each image is split into. Should be a multiple of 4, and the image
 # size would be a multiple of this. For this assignment to get the delivery correct it has to be 16
@@ -59,144 +60,61 @@ train_data_filename = data_dir + 'training/images/'
 train_labels_filename = data_dir + 'training/groundtruth/' 
 test_data_filename = data_dir + 'test_set_images'
 
-
-#############################################
-seed = 0
-datagenImg = ImageDataGenerator(
-        rotation_range=90, #in radians
-        zoom_range=0.1,
-        vertical_flip=True,
-        fill_mode= 'reflect')
-        #horizontal_flip=True,
-        #shear_range=0.25,
-        #width_shift_range=0.2,
-        #height_shift_range=0.2,
-        #channel_shift_range=10,
-datagenGT = ImageDataGenerator(
-        rotation_range=90, #in radians
-        zoom_range=0.1,
-        vertical_flip=True,
-        fill_mode= 'reflect')
-        #horizontal_flip=True,
-        #shear_range=0.25,
-        #width_shift_range=0.2,
-        #height_shift_range=0.2,
-        #channel_shift_range=10,
-
-data_gen_args = dict(featurewise_center=True,
-                     featurewise_std_normalization=True,
-                     rotation_range=90,
-                     width_shift_range=0.1,
-                     height_shift_range=0.1,
-                     shear_range=0.15,
-                     zoom_range=0.1,
-                     channel_shift_range=10,
-                     horizontal_flip=True,
-                     vertical_flip=True)
+# Directive for storing the augmented training images
 imgDir = data_dir + 'training/augmented/images'
 groundThruthDir = data_dir + 'training/augmented/groundtruth'
 
-# Create target directory & all intermediate directories if don't exists
-try:
-  os.makedirs(imgDir)
-  os.makedirs(groundThruthDir)
-  print("Directory " , imgDir ,  " Created ")
-except FileExistsError:
-    print("Directory " , imgDir ,  " already exists")  
-
-
-
-
-
-image_datagen = ImageDataGenerator(**data_gen_args)
-ground_thruth_datagen = ImageDataGenerator(**data_gen_args)
-
-#moving original pictures to augmentet position
-for i in range(1, TRAINING_SIZE+1):
-  imageid = "satImage_%.3d" % i
-  image_filename = train_data_filename + imageid + ".png"
-  gt_filename = train_labels_filename + imageid + ".png"
-  image_dest = imgDir + "/" + imageid + ".png"
-  gt_dest = groundThruthDir + "/" + imageid + ".png"
-  #print(image_dest,gt_dest)
-  shutil.copyfile(image_filename, image_dest)
-  shutil.copyfile(gt_filename, gt_dest)
-
-for i in range(1,TRAINING_SIZE+1):
-  imageid = "satImage_%.3d" % i
-  image_filename = train_data_filename + imageid + ".png"
-  groundthruth_filename = train_labels_filename + imageid + ".png"
-  trainImg = load_img(image_filename)
-  trainLabel = load_img(groundthruth_filename,color_mode='grayscale')
-  img_arr = img_to_array(trainImg)
-  img_arr = img_arr.reshape((1,) + img_arr.shape)
-  gT_arr = img_to_array(trainLabel)
-  gT_arr = gT_arr.reshape((1,) + gT_arr.shape)
-  #for j in range(5):
-    #image_datagen.flow_from_directory(img_arr,batch_size=1, save_to_dir=imgDir, save_prefix=imageid,save_format='png', seed=j)
-    #ground_thruth_datagen.flow_from_directory(gT_arr,batch_size=1, save_to_dir=groundThruthDir, save_prefix=imageid,save_format='png', seed=j)
-  j = 0
-  for batch in datagenImg.flow(
-    img_arr,
-    batch_size=1, 
-    save_to_dir=imgDir, 
-    save_prefix=imageid,
-    save_format='png', 
-    seed=j):
-    j +=1
-    if j>=MAX_AUG:
-      break
-  j = 0
-  for batch in datagenGT.flow(
-    gT_arr,
-    batch_size=1, 
-    save_to_dir=groundThruthDir, 
-    save_prefix=imageid,
-    save_format='png', 
-    seed=j):
-    j +=1
-    if j>=MAX_AUG:
-      break
 
 
 
 # Loading the data, and set wheter it is to be augmented or not
-x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE, 
-          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir) # The last 3 parameters can be blank when we dont want augmentation
+x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE,
+          augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
 
 
 
 # Class weigths
-classes = np.array([0,1])
-class_weights = class_weight.compute_class_weight('balanced',classes,y_train[:,1])
-
+#classes = np.array([0,1])
+#class_weights = class_weight.compute_class_weight('balanced',classes,y_train[:,1])
+#print(class_weights) 
+# {0:0.66819193, 1:1.98639715} Class 1 (road) weights mer enn class 0 (foreground)
+#class_weights = {0:1, 1:4}
+class_weights = (1, 7)
+print('Class weights: ',class_weights) 
 
 # input image dimensions
 img_rows, img_cols = BATCH_SIZE, BATCH_SIZE
 input_shape = (img_rows, img_cols, NUM_CHANNELS) 
 
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(2, 2),
+model.add(Conv2D(32, kernel_size=(3, 3),
                  activation='relu',
                  input_shape=input_shape, padding="same")) #32 is number of outputs from that layer, kernel_size is filter size, 
 #model.add(Conv2D(64, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
+#model.add(Dropout(0.1))
+
 model.add(Conv2D(64, (3, 3), activation='relu', padding="same"))
 model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
-model.add(Conv2D(64*2, (5, 5), activation='relu', padding="same"))
+#model.add(Dropout(0.25))
+
+model.add(Conv2D(64*2, (2, 2), activation='relu', padding="same"))
 model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
+
 model.add(Flatten())
 model.add(Dense(128*2, activation='relu'))
-#model.add(Dropout(0.5))
+model.add(Dropout(0.5))
 model.add(Dense(NUM_LABELS, activation='softmax'))
 
 # Compile
 model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.Adadelta(),
+              optimizer=keras.optimizers.Adam(),
               metrics=['accuracy'])
 
 # Train the model
 print("X", x_train.shape, "y", y_train.shape)
+#print(y_train[:10]) # kolonne 0 sier om den er foreground eller ikke, kolonne 1 sier om den er road eller ikke
+# Altså når man lager weights med den første kolonnen, vil man få klasse 1 = road og klasse 0 = background
 model.fit(x_train, y_train,
           batch_size=BATCH_SIZE,
           epochs=NUM_EPOCHS,
@@ -216,8 +134,24 @@ y_submit = model.predict_classes(x_test)
 print(y_submit.shape)
 print(sum(y_submit))
 
+
+prediction_training_dir = "predictions_training/"
+#image_filenames = []
+if not os.path.isdir(prediction_training_dir):
+    os.mkdir(prediction_training_dir)
+for i in range(1, TRAINING_SIZE+1):
+    oimg = get_prediction_with_overlay(train_data_filename, i, 'train', model, IMG_PATCH_SIZE, PIXEL_DEPTH)
+    oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png")
+
+    imgpred = get_predictionimage(train_data_filename, i, 'train', model, IMG_PATCH_SIZE, PIXEL_DEPTH)
+    imgpred.save(prediction_training_dir + "predictimg_" + str(i) + ".png")
+
+
+
 #image_filenames=[]
 prediction_test_dir = "predictions_test/"
+if not os.path.isdir(prediction_test_dir):
+    os.mkdir(prediction_test_dir)
 for i in range(1,TESTING_SIZE+1):
     test_data_filename = data_dir + 'test_set_images'
 

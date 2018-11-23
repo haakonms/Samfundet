@@ -8,6 +8,8 @@ import numpy
 import matplotlib.image as mpimg
 from PIL import Image
 from pathlib import Path
+import shutil
+from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 
 def img_crop(im, w, h):
@@ -70,6 +72,108 @@ def extract_data(filename, num_images, IMG_PATCH_SIZE, datatype):
     return numpy.asarray(data)
 
 
+def augmentation(data_dir, imgDir, groundThruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG):
+
+    seed = 0
+    datagenImg = ImageDataGenerator(
+            rotation_range=180, #in degrees
+            zoom_range=0.1,
+            vertical_flip=True,
+            fill_mode= 'reflect',
+            brightness_range=(0,2))
+            #horizontal_flip=True,
+            #shear_range=0.25,
+            #width_shift_range=0.2,
+            #height_shift_range=0.2,
+            #channel_shift_range=10,
+    datagenGT = ImageDataGenerator(
+            rotation_range=180, #in radians
+            zoom_range=0.1,
+            vertical_flip=True,
+            fill_mode= 'reflect',
+            brightness_range=(0,2))
+            #horizontal_flip=True,
+            #shear_range=0.25,
+            #width_shift_range=0.2,
+            #height_shift_range=0.2,
+            #channel_shift_range=10,
+
+    data_gen_args = dict(featurewise_center=True,
+                         featurewise_std_normalization=True,
+                         rotation_range=90,
+                         width_shift_range=0.1,
+                         height_shift_range=0.1,
+                         shear_range=0.15,
+                         zoom_range=0.1,
+                         channel_shift_range=10,
+                         horizontal_flip=True,
+                         vertical_flip=True)
+
+
+    if os.path.exists(imgDir):
+        shutil.rmtree(imgDir)
+        print("Directory " , imgDir ,  " already exists, overwritten")
+    os.makedirs(imgDir)
+    if os.path.exists(groundThruthDir):
+        shutil.rmtree(groundThruthDir)
+        print("Directory " , groundThruthDir ,  " already exists, overwritten")
+    os.makedirs(groundThruthDir)
+
+
+    #image_datagen = ImageDataGenerator(**data_gen_args)
+    #ground_thruth_datagen = ImageDataGenerator(**data_gen_args)
+
+    #moving original pictures to augmentet position
+    for i in range(1, TRAINING_SIZE+1):
+      imageid = "satImage_%.3d" % i
+      image_filename = train_data_filename + imageid + ".png"
+      gt_filename = train_labels_filename + imageid + ".png"
+      image_dest = imgDir + "/" + imageid + ".png"
+      gt_dest = groundThruthDir + "/" + imageid + ".png"
+      #print(image_dest,gt_dest)
+      shutil.copyfile(image_filename, image_dest)
+      shutil.copyfile(gt_filename, gt_dest)
+
+    for i in range(1,TRAINING_SIZE+1):
+      imageid = "satImage_%.3d" % i
+      image_filename = train_data_filename + imageid + ".png"
+      groundthruth_filename = train_labels_filename + imageid + ".png"
+      trainImg = load_img(image_filename)
+      trainLabel = load_img(groundthruth_filename,color_mode='grayscale')
+      img_arr = img_to_array(trainImg)
+      img_arr = img_arr.reshape((1,) + img_arr.shape)
+      gT_arr = img_to_array(trainLabel)
+      gT_arr = gT_arr.reshape((1,) + gT_arr.shape)
+      #for j in range(5):
+        #image_datagen.flow_from_directory(img_arr,batch_size=1, save_to_dir=imgDir, save_prefix=imageid,save_format='png', seed=j)
+        #ground_thruth_datagen.flow_from_directory(gT_arr,batch_size=1, save_to_dir=groundThruthDir, save_prefix=imageid,save_format='png', seed=j)
+      j = 0
+      seed_array = numpy.random.randint(10000, size=(1,MAX_AUG), dtype='l')
+      for batch in datagenImg.flow(
+        img_arr,
+        batch_size=1, 
+        save_to_dir=imgDir, 
+        save_prefix=imageid,
+        save_format='png', 
+        seed=seed_array[j]):
+        j +=1
+        if j>=MAX_AUG:
+          break
+      j = 0
+      for batch in datagenGT.flow(
+        gT_arr,
+        batch_size=1, 
+        save_to_dir=groundThruthDir, 
+        save_prefix=imageid,
+        save_format='png', 
+        seed=seed_array[j]):
+        j +=1
+        if j>=MAX_AUG:
+          break
+
+
+
+
 def extract_aug_data_and_labels(filename, num_images, IMG_PATCH_SIZE):
     """Extract the images into a 4D tensor [image index, y, x, channels].
     Values are rescaled from [0, 255] down to [-0.5, 0.5].
@@ -130,7 +234,7 @@ def extract_labels(filename, num_images, IMG_PATCH_SIZE):
     return labels.astype(numpy.float32)
 
 
-def load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir=''):
+def load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundThruthDir=''):
 
     if augment == False:
         print('\nLoading training images')
@@ -141,6 +245,7 @@ def load_data(train_data_filename, train_labels_filename, test_data_filename, TR
         y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE)
         #print(y_train[:20])
     elif augment == True:
+        augmentation(data_dir, augImgDir, groundThruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG)
         x_train, y_train = extract_aug_data_and_labels(augImgDir, TRAINING_SIZE*(MAX_AUG+1), IMG_PATCH_SIZE)
 
     
