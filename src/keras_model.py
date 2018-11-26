@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from mask_to_submission import *
 from helpers import *
+from F1_metrics import *
 
 import code
 import tensorflow.python.platform
@@ -47,7 +48,7 @@ BATCH_SIZE = 16 # 64
 NUM_EPOCHS = 5
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
-MAX_AUG = 2
+MAX_AUG = 3
 
 # The size of the patches each image is split into. Should be a multiple of 4, and the image
 # size would be a multiple of this. For this assignment to get the delivery correct it has to be 16
@@ -69,7 +70,7 @@ groundThruthDir = data_dir + 'training/augmented/groundtruth'
 
 # Loading the data, and set wheter it is to be augmented or not
 x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE,
-          augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
+          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
 
 
 
@@ -79,7 +80,7 @@ x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename,
 #print(class_weights) 
 # {0:0.66819193, 1:1.98639715} Class 1 (road) weights mer enn class 0 (foreground)
 #class_weights = {0:1, 1:4}
-class_weights = (1, 7)
+class_weights = (1,15)
 print('Class weights: ',class_weights) 
 
 # input image dimensions
@@ -129,6 +130,10 @@ model.fit(x_train, y_train,
 '''model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
                     steps_per_epoch=25000, epochs=NUM_EPOCHS, verbose=1)'''
 
+y_validation_train = model.predict_classes(x_train)
+tp, tn, fp, fn = f1_values(y_train, y_validation_train)
+f1 = f1_score(tp, fp, fn)
+print("f1", f1)
 
 y_submit = model.predict_classes(x_test)
 print('Size of predictions: ',y_submit.shape)
