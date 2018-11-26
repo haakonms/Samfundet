@@ -1,5 +1,20 @@
 # Project Road Segmentation
 
+
+numpy
+
+Scipi
+
+Tensorflow
+tensorflow
+
+Keras
+pip install Keras
+
+Correct  error
+pip install h5py==2.8.0rc1 
+
+
 For this choice of project task, we provide a set of satellite images acquired 
 from GoogleMaps. We also provide ground-truth images where each pixel is labeled 
 as road or background. 
