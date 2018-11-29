@@ -25,8 +25,7 @@ import shutil
 import keras
 #from keras.datasets import mnist
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from keras.utils import np_utils
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
@@ -73,6 +72,14 @@ x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename,
           augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
 
 
+#x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE)
+
+x_train = x_train_img
+y_train = y_train_img
+x_test = x_test_img
+
+
+
 
 # Class weigths
 #classes = np.array([0,1])
@@ -85,10 +92,15 @@ print('Class weights: ',class_weights)
 
 # input image dimensions
 img_rows, img_cols = BATCH_SIZE, BATCH_SIZE
+#img_rows = x_train[0].shape[1]
+#img_cols = img_rows
+#print(img_rows)
 input_shape = (img_rows, img_cols, NUM_CHANNELS) 
 
+
+
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
+model.add(Conv2D(400, kernel_size=(3, 3),
                  activation='relu',
                  input_shape=input_shape, padding="same")) #32 is number of outputs from that layer, kernel_size is filter size, 
 #model.add(Conv2D(64, (3, 3), activation='relu'))
