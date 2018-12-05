@@ -68,11 +68,11 @@ groundThruthDir = data_dir + 'training/augmented/groundtruth'
 
 
 # Loading the data, and set wheter it is to be augmented or not
-x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE,
-          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
+#x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE,
+#          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
 
 
-#x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE)
+x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE)
 
 x_train = x_train_img
 y_train = y_train_img
@@ -91,9 +91,9 @@ class_weights = (1,15)
 print('Class weights: ',class_weights) 
 
 # input image dimensions
-img_rows, img_cols = BATCH_SIZE, BATCH_SIZE
-#img_rows = x_train[0].shape[1]
-#img_cols = img_rows
+#img_rows, img_cols = BATCH_SIZE, BATCH_SIZE
+img_rows = x_train[0].shape[1]
+img_cols = img_rows
 #print(img_rows)
 input_shape = (img_rows, img_cols, NUM_CHANNELS) 
 

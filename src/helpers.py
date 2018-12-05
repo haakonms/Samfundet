@@ -302,6 +302,7 @@ def extract_data_pixelwise(filename, num_images, datatype):
 # Extract label images
 def extract_labels_pixelwise(filename, num_images):
     """Extract the labels into a 1-hot matrix [image index, label index]."""
+    """ We want the images with depth = 2, one for each class, one of the depths is 1 and the other 0"""
     gt_imgs = []
     for i in range(1, num_images+1):
         imageid = "satImage_%.3d" % i
@@ -314,13 +315,14 @@ def extract_labels_pixelwise(filename, num_images):
         else:
             print ('File ' + image_filename + ' does not exist')
 
-    labels = numpy.zeros((50,400,400,1))
+    labels = numpy.zeros((50,400,400,2))
 
     for i in range(len(gt_imgs)):
         img = numpy.asarray(gt_imgs[i])
 
         for row in range(img.shape[0]):
             for col in range(img.shape[1]):
+                labels[i,row,col, 0] = int(1-value_to_class_img(img[row,col]))
                 labels[i,row,col, 0] = value_to_class_img(img[row,col])
 
 
