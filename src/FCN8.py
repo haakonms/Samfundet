@@ -40,7 +40,7 @@ def FCN8( nClasses ,  input_height, input_width , vgg_level=3):
 	# assert input_width%32 == 0
 
 	# https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_th_dim_ordering_th_kernels.h5
-	img_input = Input(shape=(3,input_height,input_width))
+	img_input = Input(shape=(input_height,input_width, 3))
 
 	x = Conv2D(64, (3, 3), activation='relu', padding='same', name='block1_conv1', data_format=IMAGE_ORDERING )(img_input)
 	x = Conv2D(64, (3, 3), activation='relu', padding='same', name='block1_conv2', data_format=IMAGE_ORDERING )(x)

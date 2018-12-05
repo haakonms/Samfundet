@@ -12,6 +12,7 @@ import shutil
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 
+
 def img_crop(im, w, h):
     list_patches = []
     imgwidth = im.shape[0]
@@ -276,7 +277,7 @@ def load_data(train_data_filename, train_labels_filename, test_data_filename, TR
 
 
 
-def extract_data_pixelwise(filename, num_images, datatype):
+def extract_data_pixelwise(filename, num_images, datatype, new_dim_train=0):
     """Extract the images into a 4D tensor [image index, y, x, channels].
     Values are rescaled from [0, 255] down to [-0.5, 0.5].
     """
@@ -292,6 +293,9 @@ def extract_data_pixelwise(filename, num_images, datatype):
         if os.path.isfile(image_filename):
             # Add the image to the imgs-array
             img = mpimg.imread(image_filename)
+            #img = Image.open(image_filename)
+            #if datatype == 'train':
+            #    img.resize((new_dim_train , new_dim_train))
             imgs.append(img)
         else:
             print ('File ' + image_filename + ' does not exist')
@@ -300,7 +304,7 @@ def extract_data_pixelwise(filename, num_images, datatype):
 
 
 # Extract label images
-def extract_labels_pixelwise(filename, num_images):
+def extract_labels_pixelwise(filename, num_images, new_dim_train=0):
     """Extract the labels into a 1-hot matrix [image index, label index]."""
     """ We want the images with depth = 2, one for each class, one of the depths is 1 and the other 0"""
     gt_imgs = []
@@ -311,14 +315,19 @@ def extract_labels_pixelwise(filename, num_images):
         if os.path.isfile(image_filename):
             # Add the image to the imgs-array
             img = mpimg.imread(image_filename)
+            #print(img.shape)
+            #img.resize((new_dim_train , new_dim_train))
+            #print(img.shape)
             gt_imgs.append(img)
         else:
             print ('File ' + image_filename + ' does not exist')
 
+    #print(len(gt_imgs))
     labels = numpy.zeros((50,400,400,2))
 
     for i in range(len(gt_imgs)):
         img = numpy.asarray(gt_imgs[i])
+        #print(img.shape)
 
         for row in range(img.shape[0]):
             for col in range(img.shape[1]):
@@ -330,15 +339,15 @@ def extract_labels_pixelwise(filename, num_images):
     return labels.astype(numpy.float32)
 
 
-def load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE):
+def load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE, new_dim_train):
     x_test_img = extract_data_pixelwise(test_data_filename, TESTING_SIZE,  'test')
-    x_train_img = extract_data_pixelwise(train_data_filename, TRAINING_SIZE,  'train')
-    y_train_img = extract_labels_pixelwise(train_labels_filename, TRAINING_SIZE)
-
-    
-    print('Train data shape: ',x_train_img.shape)
-    print('Train labels shape: ',y_train_img.shape)
     print('Test data shape: ',x_test_img.shape)
+
+    x_train_img = extract_data_pixelwise(train_data_filename, TRAINING_SIZE,  'train', new_dim_train =new_dim_train)
+    print('Train data shape: ',x_train_img.shape)
+    y_train_img = extract_labels_pixelwise(train_labels_filename, TRAINING_SIZE, new_dim_train =new_dim_train)
+    print('Train labels shape: ',y_train_img.shape)
+
 
     #[cl1,cl2] = numpy.sum(y_train_img, axis = 0, dtype = int)
     road = numpy.sum(y_train_img[:,:,:,1], dtype = int)
