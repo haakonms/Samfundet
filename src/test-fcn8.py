@@ -12,7 +12,7 @@ from PIL import Image
 from mask_to_submission import *
 from helpers import *
 from F1_metrics import *
-
+from FCN8 import *
 import code
 import tensorflow.python.platform
 
@@ -35,7 +35,6 @@ from pathlib import Path
 from sklearn.utils import class_weight
 
 
-
 NUM_CHANNELS = 3 # RGB images
 PIXEL_DEPTH = 255
 NUM_LABELS = 2
@@ -47,7 +46,7 @@ BATCH_SIZE = 16 # 64
 NUM_EPOCHS = 5
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
-MAX_AUG = 5
+MAX_AUG = 3
 
 # The size of the patches each image is split into. Should be a multiple of 4, and the image
 # size would be a multiple of this. For this assignment to get the delivery correct it has to be 16
@@ -69,7 +68,7 @@ groundThruthDir = data_dir + 'training/augmented/groundtruth'
 
 # Loading the data, and set wheter it is to be augmented or not
 #x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE,
-#          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
+ #         augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
 
 
 x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE)
@@ -87,54 +86,30 @@ x_test = x_test_img
 #print(class_weights) 
 # {0:0.66819193, 1:1.98639715} Class 1 (road) weights mer enn class 0 (foreground)
 #class_weights = {0:1, 1:4}
-class_weights = (1,15)
-print('Class weights: ',class_weights) 
+#class_weights = (1,15)
+#print('Class weights: ',class_weights) 
 
 # input image dimensions
 #img_rows, img_cols = BATCH_SIZE, BATCH_SIZE
 img_rows = x_train[0].shape[1]
 img_cols = img_rows
-#print(img_rows)
+print(img_rows)
 input_shape = (img_rows, img_cols, NUM_CHANNELS) 
 
+model = FCN8( nClasses=2 ,  input_height=400, input_width=400)
 
-
-model = Sequential()
-model.add(Conv2D(400, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=input_shape, padding="same")) #32 is number of outputs from that layer, kernel_size is filter size, 
-#model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
-#model.add(Dropout(0.1))
-
-model.add(Conv2D(64, (3, 3), activation='relu', padding="same"))
-model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
-#model.add(Dropout(0.25))
-
-model.add(Conv2D(64*2, (2, 2), activation='relu', padding="same"))
-model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
-
-model.add(Flatten())
-model.add(Dense(128*2, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(NUM_LABELS, activation='softmax'))
-
-# Compile
 model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.Adam(),
               metrics=['accuracy'])
 
-# Train the model
-print("X", x_train.shape, "y", y_train.shape)
-#print(y_train[:10]) # kolonne 0 sier om den er foreground eller ikke, kolonne 1 sier om den er road eller ikke
-# Altså når man lager weights med den første kolonnen, vil man få klasse 1 = road og klasse 0 = background
 model.fit(x_train, y_train,
           batch_size=BATCH_SIZE,
           epochs=NUM_EPOCHS,
           shuffle = True,
           verbose=1,
-          validation_split = 0.1,
-          class_weight = class_weights)
+          validation_split = 0.1
+          #class_weight = class_weights
+          )
           #validation_data=(x_test, y_test))
 #score = model.evaluate(x_test, y_test, verbose=0)
 #print('Test loss:', score[0])
@@ -187,10 +162,6 @@ for i in range(1,TESTING_SIZE+1):
 
 # Make submission file
 prediction_to_submission('submission_keras.csv', y_submit)
-
-
-
-
 
 
 

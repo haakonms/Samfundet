@@ -37,6 +37,14 @@ def value_to_class(v):
     else:
         return [1, 0]
 
+def value_to_class_img(v):
+    foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
+    df = numpy.sum(v)
+    if df > foreground_threshold:
+        return 1
+    else:
+        return 0
+
 def extract_data(filename, num_images, IMG_PATCH_SIZE, datatype):
     """Extract the images into a 4D tensor [image index, y, x, channels].
     Values are rescaled from [0, 255] down to [-0.5, 0.5].
@@ -265,6 +273,81 @@ def load_data(train_data_filename, train_labels_filename, test_data_filename, TR
 
 
     return x_train, y_train, x_test
+
+
+
+def extract_data_pixelwise(filename, num_images, datatype):
+    """Extract the images into a 4D tensor [image index, y, x, channels].
+    Values are rescaled from [0, 255] down to [-0.5, 0.5].
+    """
+    imgs = []
+    for i in range(1, num_images+1):
+        if datatype == 'train':
+            imageid = "satImage_%.3d" % i
+            image_filename = filename + imageid + ".png"
+        elif datatype == 'test':
+            imageid = "/test_%d" % i
+            image_filename = filename + imageid + imageid + ".png"
+        
+        if os.path.isfile(image_filename):
+            # Add the image to the imgs-array
+            img = mpimg.imread(image_filename)
+            imgs.append(img)
+        else:
+            print ('File ' + image_filename + ' does not exist')
+
+    return numpy.asarray(imgs)
+
+
+# Extract label images
+def extract_labels_pixelwise(filename, num_images):
+    """Extract the labels into a 1-hot matrix [image index, label index]."""
+    """ We want the images with depth = 2, one for each class, one of the depths is 1 and the other 0"""
+    gt_imgs = []
+    for i in range(1, num_images+1):
+        imageid = "satImage_%.3d" % i
+        image_filename = filename + imageid + ".png"
+        
+        if os.path.isfile(image_filename):
+            # Add the image to the imgs-array
+            img = mpimg.imread(image_filename)
+            gt_imgs.append(img)
+        else:
+            print ('File ' + image_filename + ' does not exist')
+
+    labels = numpy.zeros((50,400,400,2))
+
+    for i in range(len(gt_imgs)):
+        img = numpy.asarray(gt_imgs[i])
+
+        for row in range(img.shape[0]):
+            for col in range(img.shape[1]):
+                labels[i,row,col, 0] = int(1-value_to_class_img(img[row,col]))
+                labels[i,row,col, 1] = value_to_class_img(img[row,col])
+
+
+    # Convert to dense 1-hot representation.
+    return labels.astype(numpy.float32)
+
+
+def load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE):
+    x_test_img = extract_data_pixelwise(test_data_filename, TESTING_SIZE,  'test')
+    x_train_img = extract_data_pixelwise(train_data_filename, TRAINING_SIZE,  'train')
+    y_train_img = extract_labels_pixelwise(train_labels_filename, TRAINING_SIZE)
+
+    
+    print('Train data shape: ',x_train_img.shape)
+    print('Train labels shape: ',y_train_img.shape)
+    print('Test data shape: ',x_test_img.shape)
+
+    #[cl1,cl2] = numpy.sum(y_train_img, axis = 0, dtype = int)
+    road = numpy.sum(y_train_img[:,:,:,1], dtype = int)
+    print('Number of samples in class 1 (background): ',road)
+    print('Number of samples in class 2 (road): ',8000000-road, '\n')
+
+
+    return x_train_img, y_train_img, x_test_img
+
 
 
 
