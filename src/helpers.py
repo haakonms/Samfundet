@@ -323,7 +323,7 @@ def extract_labels_pixelwise(filename, num_images):
         for row in range(img.shape[0]):
             for col in range(img.shape[1]):
                 labels[i,row,col, 0] = int(1-value_to_class_img(img[row,col]))
-                labels[i,row,col, 0] = value_to_class_img(img[row,col])
+                labels[i,row,col, 1] = value_to_class_img(img[row,col])
 
 
     # Convert to dense 1-hot representation.
@@ -341,7 +341,7 @@ def load_data_img(train_data_filename, train_labels_filename, test_data_filename
     print('Test data shape: ',x_test_img.shape)
 
     #[cl1,cl2] = numpy.sum(y_train_img, axis = 0, dtype = int)
-    road = numpy.sum(y_train_img, dtype = int)
+    road = numpy.sum(y_train_img[:,:,:,1], dtype = int)
     print('Number of samples in class 1 (background): ',road)
     print('Number of samples in class 2 (road): ',8000000-road, '\n')
 
