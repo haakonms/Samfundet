@@ -47,7 +47,7 @@ BATCH_SIZE = 16 # 64
 NUM_EPOCHS = 5
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
-MAX_AUG = 3
+MAX_AUG = 5
 
 # The size of the patches each image is split into. Should be a multiple of 4, and the image
 # size would be a multiple of this. For this assignment to get the delivery correct it has to be 16
