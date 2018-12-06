@@ -5,7 +5,8 @@ from keras.layers import *
 import os
 file_path = os.path.dirname( os.path.abspath(__file__) )
 
-VGG_Weights_path = file_path+"/../weights/vgg16_weights_th_dim_ordering_th_kernels.h5"
+VGG_Weights_path = file_path+"/../weights/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5"
+#VGG_Weights_path = file_path+"/../weights/vgg16_weights_th_dim_ordering_th_kernels.h5"
 
 IMAGE_ORDERING = 'channels_first' 
 
@@ -40,7 +41,7 @@ def FCN8( nClasses ,  input_height, input_width , vgg_level=3):
 	# assert input_width%32 == 0
 
 	# https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_th_dim_ordering_th_kernels.h5
-	img_input = Input(shape=(input_height,input_width, 3))
+	img_input = Input(shape=(3,input_height,input_width))
 
 	x = Conv2D(64, (3, 3), activation='relu', padding='same', name='block1_conv1', data_format=IMAGE_ORDERING )(img_input)
 	x = Conv2D(64, (3, 3), activation='relu', padding='same', name='block1_conv2', data_format=IMAGE_ORDERING )(x)
@@ -73,37 +74,53 @@ def FCN8( nClasses ,  input_height, input_width , vgg_level=3):
 	x = MaxPooling2D((2, 2), strides=(2, 2), name='block5_pool', data_format=IMAGE_ORDERING )(x)
 	f5 = x
 
-	x = Flatten(name='flatten')(x)
-	x = Dense(4096, activation='relu', name='fc1')(x)
-	x = Dense(4096, activation='relu', name='fc2')(x)
-	x = Dense( 1000 , activation='softmax', name='predictions')(x)
+	#x = Flatten(name='flatten')(x)
+	#x = Dense(4096, activation='relu', name='fc1')(x)
+	#x = Dense(4096, activation='relu', name='fc2')(x)
+	#x = Dense( 1000 , activation='softmax', name='predictions')(x)
 
-	vgg  = Model(  img_input , x  )
+	vgg  = Model(  img_input , f5  )
 	vgg.load_weights(VGG_Weights_path)
 
-	o = f5
+	o = f5 # Max pooling after block 5
+	n = 4096
 
-	o = ( Conv2D( 4096 , ( 7 , 7 ) , activation='relu' , padding='same', data_format=IMAGE_ORDERING))(o)
+	o = ( Conv2D( n , ( 7 , 7 ) , activation='relu' , padding='same', data_format=IMAGE_ORDERING))(o)
 	o = Dropout(0.5)(o)
-	o = ( Conv2D( 4096 , ( 1 , 1 ) , activation='relu' , padding='same', data_format=IMAGE_ORDERING))(o)
-	o = Dropout(0.5)(o)
+	conv7 = ( Conv2D( n , ( 1 , 1 ) , activation='relu' , padding='same', data_format=IMAGE_ORDERING))(o)
+	conv7 = Dropout(0.5)(conv7)
 
+
+	## 4 times upsamping for pool4 layer
+	conv7_4 = Conv2DTranspose( nClasses , kernel_size=(4,4) ,  strides=(4,4) , use_bias=False, data_format=IMAGE_ORDERING )(conv7)
+	## (None, 224, 224, 10)
+	## 2 times upsampling for pool411
+	pool411 = ( Conv2D( nClasses , ( 1 , 1 ) , activation='relu' , padding='same', name="pool4_11", data_format=IMAGE_ORDERING))(f4)
+	pool411_2 = (Conv2DTranspose( nClasses , kernel_size=(2,2) ,  strides=(2,2) , use_bias=False, data_format=IMAGE_ORDERING ))(pool411)
+
+	pool311 = ( Conv2D( nClasses , ( 1 , 1 ) , activation='relu' , padding='same', name="pool3_11", data_format=IMAGE_ORDERING))(f3)
+	    
+	o = Add(name="add")([pool411_2, pool311, conv7_4 ])
+	o = Conv2DTranspose( nClasses , kernel_size=(8,8) ,  strides=(8,8) , use_bias=False, data_format=IMAGE_ORDERING )(o)
+	o = (Activation('softmax'))(o)
+	model = Model( img_input , o )
+
+	"""
 	o = ( Conv2D( nClasses ,  ( 1 , 1 ) ,kernel_initializer='he_normal' , data_format=IMAGE_ORDERING))(o)
 	o = Conv2DTranspose( nClasses , kernel_size=(4,4) ,  strides=(2,2) , use_bias=False, data_format=IMAGE_ORDERING )(o)
 
-	o2 = f4
+	o2 = f4 # Max pooling after block 4
 	o2 = ( Conv2D( nClasses ,  ( 1 , 1 ) ,kernel_initializer='he_normal' , data_format=IMAGE_ORDERING))(o2)
 	
 	o , o2 = crop( o , o2 , img_input )
-	
 	o = Add()([ o , o2 ])
 
 	o = Conv2DTranspose( nClasses , kernel_size=(4,4) ,  strides=(2,2) , use_bias=False, data_format=IMAGE_ORDERING )(o)
-	o2 = f3 
+	o2 = f3  # Max pooling after block 3
 	o2 = ( Conv2D( nClasses ,  ( 1 , 1 ) ,kernel_initializer='he_normal' , data_format=IMAGE_ORDERING))(o2)
+	
 	o2 , o = crop( o2 , o , img_input )
 	o  = Add()([ o2 , o ])
-
 
 	o = Conv2DTranspose( nClasses , kernel_size=(16,16) ,  strides=(8,8) , use_bias=False, data_format=IMAGE_ORDERING )(o)
 	
@@ -118,7 +135,7 @@ def FCN8( nClasses ,  input_height, input_width , vgg_level=3):
 	model = Model( img_input , o )
 	model.outputWidth = outputWidth
 	model.outputHeight = outputHeight
-
+	"""
 	return model
 
 

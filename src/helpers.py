@@ -292,10 +292,11 @@ def extract_data_pixelwise(filename, num_images, datatype, new_dim_train=0):
         
         if os.path.isfile(image_filename):
             # Add the image to the imgs-array
-            img = mpimg.imread(image_filename)
-            #img = Image.open(image_filename)
-            #if datatype == 'train':
-            #    img.resize((new_dim_train , new_dim_train))
+            #img = mpimg.imread(image_filename)
+            img = Image.open(image_filename)
+            if datatype == 'train':
+                img = img.resize((new_dim_train , new_dim_train))
+            img = numpy.asarray(img)
             imgs.append(img)
         else:
             print ('File ' + image_filename + ' does not exist')
@@ -304,7 +305,7 @@ def extract_data_pixelwise(filename, num_images, datatype, new_dim_train=0):
 
 
 # Extract label images
-def extract_labels_pixelwise(filename, num_images, new_dim_train=0):
+def extract_labels_pixelwise(filename, num_images, new_dim_train=400):
     """Extract the labels into a 1-hot matrix [image index, label index]."""
     """ We want the images with depth = 2, one for each class, one of the depths is 1 and the other 0"""
     gt_imgs = []
@@ -314,16 +315,19 @@ def extract_labels_pixelwise(filename, num_images, new_dim_train=0):
         
         if os.path.isfile(image_filename):
             # Add the image to the imgs-array
-            img = mpimg.imread(image_filename)
+            #img = mpimg.imread(image_filename)
+            img = Image.open(image_filename)
             #print(img.shape)
-            #img.resize((new_dim_train , new_dim_train))
+            img.resize((new_dim_train , new_dim_train))
+            img = img.resize((new_dim_train , new_dim_train))
+            img = numpy.asarray(img)
             #print(img.shape)
             gt_imgs.append(img)
         else:
             print ('File ' + image_filename + ' does not exist')
 
     #print(len(gt_imgs))
-    labels = numpy.zeros((50,400,400,2))
+    labels = numpy.zeros((num_images,new_dim_train,new_dim_train,2))
 
     for i in range(len(gt_imgs)):
         img = numpy.asarray(gt_imgs[i])
@@ -341,18 +345,21 @@ def extract_labels_pixelwise(filename, num_images, new_dim_train=0):
 
 def load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE, new_dim_train):
     x_test_img = extract_data_pixelwise(test_data_filename, TESTING_SIZE,  'test')
+    x_test_img = numpy.transpose(x_test_img, (0, 3, 1, 2))
     print('Test data shape: ',x_test_img.shape)
 
     x_train_img = extract_data_pixelwise(train_data_filename, TRAINING_SIZE,  'train', new_dim_train =new_dim_train)
+    x_train_img = numpy.transpose(x_train_img, (0, 3, 1, 2))
     print('Train data shape: ',x_train_img.shape)
     y_train_img = extract_labels_pixelwise(train_labels_filename, TRAINING_SIZE, new_dim_train =new_dim_train)
+    y_train_img = numpy.transpose(y_train_img, (0, 3, 1, 2))
     print('Train labels shape: ',y_train_img.shape)
 
 
-    #[cl1,cl2] = numpy.sum(y_train_img, axis = 0, dtype = int)
-    road = numpy.sum(y_train_img[:,:,:,1], dtype = int)
+    road = numpy.sum(y_train_img[:,1,:,:], dtype = int)
+    background = numpy.sum(y_train_img[:,0,:,:], dtype = int)
     print('Number of samples in class 1 (background): ',road)
-    print('Number of samples in class 2 (road): ',8000000-road, '\n')
+    print('Number of samples in class 2 (road): ',background, '\n')
 
 
     return x_train_img, y_train_img, x_test_img
