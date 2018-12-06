@@ -81,7 +81,7 @@ def FCN8( nClasses ,  input_height, input_width , vgg_level=3):
 	#x = Dense(4096, activation='relu', name='fc2')(x)
 	#x = Dense( 1000 , activation='softmax', name='predictions')(x)
 
-	vgg  = Model(  img_input , f5  )
+	vgg  = Model( img_input , f5 )
 	vgg.load_weights(VGG_Weights_path)
 
 	o = f5 # Max pooling after block 5

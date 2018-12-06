@@ -38,13 +38,6 @@ def value_to_class(v):
     else:
         return [1, 0]
 
-def value_to_class_img(v):
-    foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
-    df = numpy.sum(v)
-    if df > foreground_threshold:
-        return 1
-    else:
-        return 0
 
 def extract_data(filename, num_images, IMG_PATCH_SIZE, datatype):
     """Extract the images into a 4D tensor [image index, y, x, channels].
@@ -326,18 +319,13 @@ def extract_labels_pixelwise(filename, num_images, new_dim_train=400):
         else:
             print ('File ' + image_filename + ' does not exist')
 
+    gt_imgs = numpy.asarray(gt_imgs)
     #print(len(gt_imgs))
     labels = numpy.zeros((num_images,new_dim_train,new_dim_train,2))
 
-    for i in range(len(gt_imgs)):
-        img = numpy.asarray(gt_imgs[i])
-        #print(img.shape)
-
-        for row in range(img.shape[0]):
-            for col in range(img.shape[1]):
-                labels[i,row,col, 0] = int(1-value_to_class_img(img[row,col]))
-                labels[i,row,col, 1] = value_to_class_img(img[row,col])
-
+    foreground_threshold = 0.5
+    labels[gt_imgs > foreground_threshold] = [1,0]
+    labels[gt_imgs <= foreground_threshold] = [0,1]
 
     # Convert to dense 1-hot representation.
     return labels.astype(numpy.float32)
@@ -363,9 +351,6 @@ def load_data_img(train_data_filename, train_labels_filename, test_data_filename
 
 
     return x_train_img, y_train_img, x_test_img
-
-
-
 
 
 def error_rate(predictions, labels):
