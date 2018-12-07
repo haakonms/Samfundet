@@ -445,11 +445,22 @@ def get_prediction(img, model, IMG_PATCH_SIZE):
     #shape ((38*38), 16,16,3)
 
     # Data now is a vector of the patches from one single image in the testing data
-    output_prediction = model.predict_classes(data)
+    output_prediction = model.predict(data)
     #predictions have shape (1444,), a prediction for each patch in the image
 
     return output_prediction
 
+def get_prediction_unet(img, model, IMG_PATCH_SIZE):
+    
+    # Turns the image into its data patches
+    data = numpy.asarray(img_crop(IMG_PATCH_SIZE, IMG_PATCH_SIZE, img))
+    #shape ((38*38), 16,16,3)
+
+    # Data now is a vector of the patches from one single image in the testing data
+    output_prediction = model.predict(data)
+    #predictions have shape (1444,), a prediction for each patch in the image
+
+    return output_prediction
 
 def get_predictionimage(filename, image_idx, datatype, model, IMG_PATCH_SIZE, PIXEL_DEPTH):
 
@@ -483,6 +494,37 @@ def get_predictionimage(filename, image_idx, datatype, model, IMG_PATCH_SIZE, PI
 
     return imgpred
 
+def get_predictionimage_unet(filename, image_idx, datatype, model, IMG_PATCH_SIZE, PIXEL_DEPTH):
+
+    i = image_idx
+    # Specify the path of the 
+    if (datatype == 'train'):
+        imageid = "satImage_%.3d" % image_idx
+        image_filename = filename + imageid + ".png"
+    elif (datatype == 'test'):
+        imageid = "/test_%d" % i
+        image_filename = filename + imageid + imageid + ".png"
+    else:
+        print('Error: Enter test or train')      
+
+    # loads the image in question
+    img = mpimg.imread(image_filename)
+    #data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
+
+    output_prediction = get_prediction_unet(img, model, IMG_PATCH_SIZE)
+    predict_img = label_to_img(img.shape[1],img.shape[2], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
+
+    
+    # Changes into a 3D array, to easier turn into image
+    predict_img_3c = numpy.zeros((img.shape[1],img.shape[2], 3), dtype=numpy.uint8)
+    predict_img8 = img_float_to_uint8(predict_img, PIXEL_DEPTH)          
+    predict_img_3c[:,:,0] = predict_img8
+    predict_img_3c[:,:,1] = predict_img8
+    predict_img_3c[:,:,2] = predict_img8
+
+    imgpred = Image.fromarray(predict_img_3c)
+
+    return imgpred
 
 def make_img_overlay(img, predicted_img, PIXEL_DEPTH):
     w = img.shape[0]
@@ -524,7 +566,32 @@ def get_prediction_with_overlay(filename, image_idx, datatype, model, IMG_PATCH_
 
     return oimg
 
+# Get prediction overlaid on the original image for given input file
+def get_prediction_with_overlay_unet(filename, image_idx, datatype, model, IMG_PATCH_SIZE, PIXEL_DEPTH):
 
+    i = image_idx
+    if (datatype == 'train'):
+        imageid = "satImage_%.3d" % image_idx
+        image_filename = filename + imageid + ".png"
+    elif (datatype == 'test'):
+        imageid = "/test_%d" % i
+        image_filename = filename + imageid + imageid + ".png"
+    else:
+        print('Error: Enter test or train')
+
+    img = mpimg.imread(image_filename)
+
+
+    # Returns a vector with a prediction for each patch
+    output_prediction = get_prediction_unet(img, model, IMG_PATCH_SIZE) 
+    
+    # Returns a representation of the image as a 2D vector with a label at each pixel
+    img_prediction = label_to_img(img.shape[1],img.shape[2], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
+    
+
+    oimg = make_img_overlay(img, img_prediction, PIXEL_DEPTH)
+
+    return oimg
 
 #########
 

@@ -25,7 +25,7 @@ def ZF_UNET_224(dropout_val=0.2, weights=None):
      #   inputs = Input(( 224, 224, INPUT_CHANNELS))
       #  axis = 1
     #else:
-    inputs = Input((INPUT_CHANNELS, 224, 224))
+    inputs = Input((INPUT_CHANNELS, None, None))
     axis = 1
     filters = 32
     IMAGE_ORDERING = 'channels_first'
