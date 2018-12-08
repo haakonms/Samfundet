@@ -207,10 +207,10 @@ y_validation_train = model.predict_classes(x_train)
 tp, tn, fp, fn = f1_values(y_train, y_validation_train)
 f1 = f1_score(tp, fp, fn)
 print("f1", f1)
-
+sum(y_submit)
 y_submit = model.predict_classes(x_test)
 print('Size of predictions: ',y_submit.shape)
-print('Number of road patches: ',sum(y_submit))
+print('Number of road patches: ',
 
 
 prediction_training_dir = "predictions_training/"
