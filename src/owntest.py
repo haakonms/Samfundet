@@ -13,6 +13,8 @@ from mask_to_submission import *
 from helpers import *
 from F1_metrics import *
 from Unet import *
+from ownFCN16 import *
+
 import code
 import tensorflow.python.platform
 
@@ -28,7 +30,6 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from keras.utils import np_utils
 from keras import backend as K
-from keras import optimizers
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 
@@ -44,7 +45,7 @@ TESTING_SIZE = 50
 VALIDATION_SIZE = 15  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 4
+NUM_EPOCHS = 5
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 MAX_AUG = 3
@@ -99,61 +100,18 @@ print(img_rows)
 input_shape = (img_rows, img_cols, NUM_CHANNELS) 
 
 #model = Unet( nClasses =NUM_LABELS , input_width=NEW_DIM_TRAIN , input_height=NEW_DIM_TRAIN , nChannels=NUM_CHANNELS )
-model = ZF_UNET_224(dropout_val=0.2, weights=None, input_shape=NEW_DIM_TRAIN)
-model.summary()
+model = test16(nC=3, input_shape=NEW_DIM_TRAIN)
 
-
-
-# min_delta = 0.000000000001
-
-# #stopper = EarlyStopping(monitor='val_loss',min_delta=min_delta,patience=2) 
-
-# class OptimizerChanger(keras.callbacks.EarlyStopping):
-#     def __init__(self, on_train_end, **kwargs):
-
-#         self.do_on_train_end = on_train_end
-#         super(OptimizerChanger,self).__init__(**kwargs)
-
-#     def on_train_end(self, logs=None):
-#         super(OptimizerChanger,self).on_train_end(self,logs)
-#         self.do_on_train_end()
-
-# def do_after_training():
-#     #warining, this creates a new optimizer and,
-#     #at the beginning, it might give you a worse training performance than before
-#     model.compile(optimizer = 'SGD', loss=keras.losses.categorical_crossentropy, metrics=['accuracy'])
-#     model.fit(x_train, y_train,
-#           batch_size=BATCH_SIZE,
-#           epochs=NUM_EPOCHS,
-#           shuffle = True,
-#           verbose=1,
-#           validation_split = 0.1
-#           #class_weight = class_weights
-#           )
-
-# changer = OptimizerChanger(on_train_end= do_after_training, 
-#                            monitor='val_loss',
-#                            min_delta=min_delta,
-#                            patience=2)
-
-
-
-
-#sgd = optimizers.SGD(lr=1E-2, decay=5**(-4), momentum=0.9, nesterov=True)
-model.compile(loss=keras.losses.categorical_crossentropy,
+model.compile(loss=keras.losses.binary_crossentropy,
               optimizer=keras.optimizers.Adam(),
               metrics=['accuracy'])
-
-
-earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.1)
 
 model.fit(x_train, y_train,
           batch_size=BATCH_SIZE,
           epochs=NUM_EPOCHS,
           shuffle = True,
           verbose=1,
-          validation_split = 0.1,
-          callbacks = [earlystop]
+          validation_split = 0.1
           #class_weight = class_weights
           )
           #validation_data=(x_test, y_test))
@@ -162,29 +120,17 @@ model.fit(x_train, y_train,
 #print('Test accuracy:', score[1])
 '''model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
                     steps_per_epoch=25000, epochs=NUM_EPOCHS, verbose=1)
-'''
-y_submit = model.predict(x_test_img)
-print('y_submit: ', y_submit.shape)
-print('antall vei / antall bakgrunn: ', np.sum(y_submit[:,0,:,:]))
-#y_predi = np.argmax(y_submit, axis=3)
-#y_testi = np.argmax(y_test, axis=3)
-#print(y_testi.shape,y_predi.shape)
 
-#for i in range(10):
-#  img = (trainpred[i] + 1)*(255.0/2)
+trainpred = model.predict(x_train_img)
+y_predi = np.argmax(y_pred, axis=3)
+y_testi = np.argmax(y_test, axis=3)
+print(y_testi.shape,y_predi.shape)
 
-prediction_test_dir = "predictions_test/"
-for i in range(1,TESTING_SIZE+1):
-  #oimg, gtimg = get_prediction_with_overlay_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN)
-  #oimg.save(prediction_test_dir + "overlay_" + str(i) + ".png")
-  gtimg = get_predictionimage_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN)
-  gtimg.save(prediction_test_dir + "gtimg_" + str(i) + ".png")
+for i in range(10):
+  img = (trainpred[i] + 1)*(255.0/2)
 
 
 
-
-
-'''
 y_validation_train = model.predict_classes(x_train)
 tp, tn, fp, fn = f1_values(y_train, y_validation_train)
 f1 = f1_score(tp, fp, fn)
@@ -193,9 +139,8 @@ print("f1", f1)
 y_submit = model.predict_classes(x_test)
 print('Size of predictions: ',y_submit.shape)
 print('Number of road patches: ',sum(y_submit))
-'''
 
-'''
+
 prediction_training_dir = "predictions_training/"
 #image_filenames = []
 if not os.path.isdir(prediction_training_dir):
@@ -231,6 +176,6 @@ for i in range(1,TESTING_SIZE+1):
 
 # Make submission file
 prediction_to_submission('submission_keras.csv', y_submit)
+''' 
 
-'''
 

@@ -20,12 +20,12 @@ OUTPUT_MASK_CHANNELS = 2
 #ZF_UNET_224_WEIGHT_PATH = 'https://github.com/ZFTurbo/ZF_UNET_224_Pretrained_Model/releases/download/v1.0/zf_unet_224.h5'
 
 
-def ZF_UNET_224(dropout_val=0.2, weights=None):
+def ZF_UNET_224(dropout_val=0.2, weights=None, input_shape=0):
     #if K.image_dim_ordering() == 'th':
      #   inputs = Input(( 224, 224, INPUT_CHANNELS))
       #  axis = 1
     #else:
-    inputs = Input((INPUT_CHANNELS, 224, 224))
+    inputs = Input((INPUT_CHANNELS, input_shape, input_shape))
     axis = 1
     filters = 32
     IMAGE_ORDERING = 'channels_first'
@@ -74,7 +74,7 @@ def ZF_UNET_224(dropout_val=0.2, weights=None):
     up_conv_224 = Conv2D(filters, (3, 3), padding='same', data_format=IMAGE_ORDERING)(up_224)
 
     conv_final = Conv2D(OUTPUT_MASK_CHANNELS, (1, 1),data_format=IMAGE_ORDERING)(up_conv_224)
-    conv_final = Activation('sigmoid')(conv_final)
+    conv_final = Activation('softmax')(conv_final)
 
 
     model = Model(inputs, conv_final, name="ZF_UNET_224")

@@ -27,12 +27,14 @@ import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from keras.utils import np_utils
+from keras.callbacks import ModelCheckpoint, Callback
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 
 from pathlib import Path
-from sklearn.utils import class_weight
+from sklearn.utils import class_weight, shuffle
+from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 
 
 
@@ -44,10 +46,10 @@ TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 5
+NUM_EPOCHS = 10
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
-MAX_AUG = 5
+MAX_AUG = 3
 
 # The size of the patches each image is split into. Should be a multiple of 4, and the image
 # size would be a multiple of this. For this assignment to get the delivery correct it has to be 16
@@ -68,15 +70,15 @@ groundThruthDir = data_dir + 'training/augmented/groundtruth'
 
 
 # Loading the data, and set wheter it is to be augmented or not
-#x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE,
-#          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
+x_train, y_train, x_test = load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE,
+          augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
 
 
-x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE)
+#x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE)
 
-x_train = x_train_img
-y_train = y_train_img
-x_test = x_test_img
+#x_train = x_train_img
+#y_train = y_train_img
+#x_test = x_test_img
 
 
 
@@ -87,7 +89,7 @@ x_test = x_test_img
 #print(class_weights) 
 # {0:0.66819193, 1:1.98639715} Class 1 (road) weights mer enn class 0 (foreground)
 #class_weights = {0:1, 1:4}
-class_weights = (1,15)
+class_weights = (1,3)
 print('Class weights: ',class_weights) 
 
 # input image dimensions
@@ -97,44 +99,103 @@ img_cols = img_rows
 #print(img_rows)
 input_shape = (img_rows, img_cols, NUM_CHANNELS) 
 
-
+ordering = 'channels_last'
 
 model = Sequential()
-model.add(Conv2D(400, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=input_shape, padding="same")) #32 is number of outputs from that layer, kernel_size is filter size, 
-#model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
-#model.add(Dropout(0.1))
 
-model.add(Conv2D(64, (3, 3), activation='relu', padding="same"))
-model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
-#model.add(Dropout(0.25))
+model.add(Conv2D(32, kernel_size=(3, 3), activation='relu',input_shape=input_shape, padding="same", data_format=ordering)) #32 is number of outputs from that layer, kernel_size is filter size, 
+model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding="same", data_format=ordering))
+#model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding="same", data_format=ordering))
+model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
+model.add(Dropout(0.25))
 
-model.add(Conv2D(64*2, (2, 2), activation='relu', padding="same"))
-model.add(MaxPooling2D(pool_size=(2, 2), padding="same"))
+model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
+model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
+#model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
+model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(128, (2, 2), activation='relu', padding="same", data_format=ordering))
+model.add(Conv2D(128, (2, 2), activation='relu', padding="same", data_format=ordering))
+model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
+model.add(Dropout(0.25))
 
 model.add(Flatten())
-model.add(Dense(128*2, activation='relu'))
+model.add(Dense(1024, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(NUM_LABELS, activation='softmax'))
 
+model.summary()
+
 # Compile
 model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.Adam(),
+              optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy'])
+
+# Split train/test
+seed = 1
+
+train_rate = 0.80
+index_train = np.random.choice(x_train.shape[0],int(x_train.shape[0]*train_rate),replace=False)
+index_val  = list(set(range(x_train.shape[0])) - set(index_train))
+                            
+x, y = shuffle(x_train,y_train)
+x_train, y_train = x[index_train],y[index_train]
+x_val, y_val = x[index_val],y[index_val]
+print('train shape: ',x_train.shape, y_train.shape)
+print('val shape: ',x_val.shape, y_val.shape)
+
+
+# F1
+class Metrics(Callback):
+  def on_train_begin(self, logs={}):
+    self.val_f1s = []
+    self.val_recalls = []
+    self.val_precisions = []
+
+  def on_epoch_end(self, epoch, logs={}):
+    val_predict = (np.asarray(self.model.predict(self.validation_data[0]))).round()
+    val_targ = self.validation_data[1]
+    #self.model.predict(self.validation_data[0])
+    _val_f1 = f1_score(val_targ, val_predict,average='micro')
+    _val_recall = recall_score(val_targ, val_predict,average='micro')
+    _val_precision = precision_score(val_targ, val_predict, average='micro')
+    self.val_f1s.append(_val_f1)
+    self.val_recalls.append(_val_recall)
+    self.val_precisions.append(_val_precision)
+    print(' — val_f1: %f — val_precision: %f — val_recall %f' %(_val_f1, _val_precision, _val_recall))
+    return
+ 
+# class Metrics(Callback):
+#     def on_epoch_end(self, batch, logs={}):
+#         predict = np.asarray(self.model.predict(self.validation_data[0]))
+#         targ = self.validation_data[1]
+#         self.f1s=f1(targ, predict)
+#         return
+
+metrics = Metrics()
+
+
+
+# Checkpoint
+filepath="weights/weights.best.hdf5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+callbacks_list = [metrics,checkpoint]
+
 
 # Train the model
 print("X", x_train.shape, "y", y_train.shape)
 #print(y_train[:10]) # kolonne 0 sier om den er foreground eller ikke, kolonne 1 sier om den er road eller ikke
 # Altså når man lager weights med den første kolonnen, vil man få klasse 1 = road og klasse 0 = background
 model.fit(x_train, y_train,
+          validation_data=(x_val, y_val),
           batch_size=BATCH_SIZE,
           epochs=NUM_EPOCHS,
           shuffle = True,
           verbose=1,
-          validation_split = 0.1,
-          class_weight = class_weights)
+          #validation_split = 0.1,
+          class_weight = class_weights,
+          callbacks = callbacks_list)
           #validation_data=(x_test, y_test))
 #score = model.evaluate(x_test, y_test, verbose=0)
 #print('Test loss:', score[0])
@@ -162,7 +223,6 @@ for i in range(1, TRAINING_SIZE+1):
 
     imgpred = get_predictionimage(train_data_filename, i, 'train', model, IMG_PATCH_SIZE, PIXEL_DEPTH)
     imgpred.save(prediction_training_dir + "predictimg_" + str(i) + ".png")
-
 
 
 #image_filenames=[]
