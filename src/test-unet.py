@@ -39,15 +39,9 @@ from sklearn.utils import class_weight
 NUM_CHANNELS = 3 # RGB images
 PIXEL_DEPTH = 255
 NUM_LABELS = 2
-<<<<<<< HEAD
-TRAINING_SIZE = 50
-TESTING_SIZE = 50
-VALIDATION_SIZE = 15  # Size of the validation set.
-=======
 TRAINING_SIZE = 5
 TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
->>>>>>> 2b40ae872028ee8b402de5ec4895d715e2de46c1
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
 NUM_EPOCHS = 4
@@ -158,12 +152,8 @@ model.fit(x_train, y_train,
           epochs=NUM_EPOCHS,
           shuffle = True,
           verbose=1,
-<<<<<<< HEAD
           validation_split = 0.1,
           callbacks = [earlystop]
-=======
-          validation_split = 0.2
->>>>>>> 2b40ae872028ee8b402de5ec4895d715e2de46c1
           #class_weight = class_weights
           )
           #validation_data=(x_test, y_test))
@@ -173,7 +163,7 @@ model.fit(x_train, y_train,
 '''model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
                     steps_per_epoch=25000, epochs=NUM_EPOCHS, verbose=1)
 '''
-<<<<<<< HEAD
+
 y_submit = model.predict(x_test_img)
 print('y_submit: ', y_submit.shape)
 print('antall vei / antall bakgrunn: ', np.sum(y_submit[:,0,:,:]))
@@ -190,10 +180,7 @@ for i in range(1,TESTING_SIZE+1):
   #oimg.save(prediction_test_dir + "overlay_" + str(i) + ".png")
   gtimg = get_predictionimage_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN)
   gtimg.save(prediction_test_dir + "gtimg_" + str(i) + ".png")
-=======
 
-y_submit = model.predict(x_test)
-print('Size of predictions: ',y_submit.shape)
 
 '''
 prediction_training_dir = "predictions_training/"
@@ -245,6 +232,7 @@ print(y_testi.shape,y_predi.shape)
 
 
 
+'''
 '''
 y_validation_train = model.predict_classes(x_train)
 tp, tn, fp, fn = f1_values(y_train, y_validation_train)
