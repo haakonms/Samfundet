@@ -80,10 +80,10 @@ def augmentation(data_dir, imgDir, groundThruthDir, train_labels_filename, train
     datagenImg = ImageDataGenerator(
             rotation_range=180, #in radians
             zoom_range=0.4,
-            fill_mode= 'reflect'
+            fill_mode= 'reflect',
             #brightness_range=(0,2))
-            #vertical_flip=True,
-            #horizontal_flip=True,
+            vertical_flip=True,
+            horizontal_flip=True
             #shear_range=0.25,
             #width_shift_range=0.2,
             #height_shift_range=0.2,
@@ -92,10 +92,10 @@ def augmentation(data_dir, imgDir, groundThruthDir, train_labels_filename, train
     datagenGT = ImageDataGenerator(
             rotation_range=180, #in radians
             zoom_range=0.4,
-            fill_mode= 'reflect'
+            fill_mode= 'reflect',
             #brightness_range=(0,2))
-            #vertical_flip=True,
-            #horizontal_flip=True,
+            vertical_flip=True,
+            horizontal_flip=True
             #shear_range=0.25,
             #width_shift_range=0.2,
             #height_shift_range=0.2,
@@ -451,7 +451,7 @@ def get_prediction(img, model, IMG_PATCH_SIZE):
     #shape ((38*38), 16,16,3)
 
     # Data now is a vector of the patches from one single image in the testing data
-    output_prediction = model.predict(data)
+    output_prediction = model.predict_classes(data)
     #predictions have shape (1444,), a prediction for each patch in the image
 
     return output_prediction

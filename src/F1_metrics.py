@@ -13,7 +13,7 @@ def accuracy(tp, fp, tn, fn):
     return (tp + tn) / (tp + tn + fp + fn)
 
 
-def f1_score(tp, fp, fn):
+def f1_measure(tp, fp, fn):
     pre = precision(tp, fp)
     rec = recall(tp, fn)
     return (2.0 * pre * rec)/(pre + rec)
