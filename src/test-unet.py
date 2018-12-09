@@ -39,15 +39,15 @@ from sklearn.utils import class_weight
 NUM_CHANNELS = 3 # RGB images
 PIXEL_DEPTH = 255
 NUM_LABELS = 2
-TRAINING_SIZE = 5
+TRAINING_SIZE = 50
 TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 4
+NUM_EPOCHS = 10
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
-MAX_AUG = 3
+MAX_AUG = 1
 NEW_DIM_TRAIN = 224
 
 # The size of the patches each image is split into. Should be a multiple of 4, and the image
@@ -79,7 +79,8 @@ x_train = x_train_img
 y_train = y_train_img
 x_test = x_test_img
 
-
+print(y_train.shape)
+print(x_train.shape)
 
 
 # Class weigths
@@ -97,9 +98,18 @@ img_rows = x_train[0].shape[1]
 img_cols = img_rows
 print(img_rows)
 #input_shape = (NUM_CHANNELS, img_rows, img_cols) 
-
+yweight = y_train[:,0,:,:]
+yweight = yweight.flatten()
+print(np.unique(yweight), sum(yweight))
+class_weights = class_weight.compute_class_weight('balanced',
+                                                 np.unique(yweight),
+                                                 yweight)
+#class_weights = (15,1)
+print('Class weights: ',class_weights) 
 #model = Unet( nClasses =NUM_LABELS , input_width=NEW_DIM_TRAIN , input_height=NEW_DIM_TRAIN , nChannels=NUM_CHANNELS )
-model = ZF_UNET_224(dropout_val=0.2, weights=None, input_shape=NEW_DIM_TRAIN)
+#model = ZF_UNET_224(dropout_val=0.2, weights=None, input_shape=NEW_DIM_TRAIN)
+#model = ZF_UNET_224(weights='generator',input_shape=NEW_DIM_TRAIN)
+model = ZF_UNET_224(class_weights,NEW_DIM_TRAIN)
 model.summary()
 
 
@@ -153,8 +163,8 @@ model.fit(x_train, y_train,
           shuffle = True,
           verbose=1,
           validation_split = 0.1,
-          callbacks = [earlystop]
-          #class_weight = class_weights
+          #callbacks = [earlystop],
+          class_weight = class_weights
           )
           #validation_data=(x_test, y_test))
 #score = model.evaluate(x_test, y_test, verbose=0)
@@ -164,9 +174,9 @@ model.fit(x_train, y_train,
                     steps_per_epoch=25000, epochs=NUM_EPOCHS, verbose=1)
 '''
 
-y_submit = model.predict(x_test_img)
-print('y_submit: ', y_submit.shape)
-print('antall vei / antall bakgrunn: ', np.sum(y_submit[:,0,:,:]))
+#y_submit = model.predict(x_test_img)
+#print('y_submit: ', y_submit.shape)
+#print('antall vei / antall bakgrunn: ', np.sum(y_submit[:,0,:,:]))
 #y_predi = np.argmax(y_submit, axis=3)
 #y_testi = np.argmax(y_test, axis=3)
 #print(y_testi.shape,y_predi.shape)
@@ -175,27 +185,31 @@ print('antall vei / antall bakgrunn: ', np.sum(y_submit[:,0,:,:]))
 #  img = (trainpred[i] + 1)*(255.0/2)
 
 prediction_test_dir = "predictions_test/"
+y_submit = np.zeros((((608//IMG_PATCH_SIZE)**2)*TESTING_SIZE,2))
 for i in range(1,TESTING_SIZE+1):
   #oimg, gtimg = get_prediction_with_overlay_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN)
   #oimg.save(prediction_test_dir + "overlay_" + str(i) + ".png")
-  gtimg = get_predictionimage_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN)
-  gtimg.save(prediction_test_dir + "gtimg_" + str(i) + ".png")
+  y_submit[((608//IMG_PATCH_SIZE)**2)*(i-1):((608//IMG_PATCH_SIZE)**2)*i,:], gtimg = get_pred_and_ysubmit_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN,IMG_PATCH_SIZE,prediction_test_dir)
+  #gtimg.save(prediction_test_dir + "gtimg_" + str(i) + ".png")
 
+print('y_submit: ', y_submit.shape)
+print('antall vei / antall bakgrunn: ', np.sum(y_submit[:,0]))
 
-'''
 prediction_training_dir = "predictions_training/"
 #image_filenames = []
 if not os.path.isdir(prediction_training_dir):
     os.mkdir(prediction_training_dir)
 for i in range(1, TRAINING_SIZE+1):
-    oimg = get_prediction_with_overlay(train_data_filename, i, 'train', model, IMG_PATCH_SIZE, PIXEL_DEPTH)
+    oimg, imgpred = get_prediction_with_overlay_pixelwise(train_data_filename, i, 'train', model, PIXEL_DEPTH, NEW_DIM_TRAIN)
+    #save_overlay_and_prediction(train_data_filename, i, 'train', model, IMG_PATCH_SIZE, PIXEL_DEPTH, prediction_training_dir)
+    #oimg = get_prediction_with_overlay(train_data_filename, i, 'train', model, IMG_PATCH_SIZE, PIXEL_DEPTH)
     oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png")
 
-    imgpred = get_predictionimage(train_data_filename, i, 'train', model, IMG_PATCH_SIZE, PIXEL_DEPTH)
+    #imgpred = get_predictionimage(train_data_filename, i, 'train', model, IMG_PATCH_SIZE, PIXEL_DEPTH)
     imgpred.save(prediction_training_dir + "predictimg_" + str(i) + ".png")
 
 
-
+'''
 #image_filenames=[]
 prediction_test_dir = "predictions_test/"
 if not os.path.isdir(prediction_test_dir):
@@ -217,7 +231,7 @@ for i in range(1,TESTING_SIZE+1):
 #pred_to_submission(submission_filename,*image_filenames)    
 
 # Make submission file
-prediction_to_submission('submission_keras.csv', y_submit)
+prediction_to_submission2('submission_keras.csv', y_submit)
 
 
 

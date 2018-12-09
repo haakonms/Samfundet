@@ -9,6 +9,7 @@ import matplotlib.image as mpimg
 from PIL import Image
 from pathlib import Path
 import shutil
+#from skimage.transform import resize
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 
@@ -272,7 +273,7 @@ def load_data(train_data_filename, train_labels_filename, test_data_filename, TR
 
 
 
-def extract_data_pixelwise(filename, num_images, datatype, new_dim_train=0):
+def extract_data_pixelwise(filename, num_images, datatype, new_dim_train):
     """Extract the images into a 4D tensor [image index, y, x, channels].
     Values are rescaled from [0, 255] down to [-0.5, 0.5].
     """
@@ -289,10 +290,10 @@ def extract_data_pixelwise(filename, num_images, datatype, new_dim_train=0):
             # Add the image to the imgs-array
             #img = mpimg.imread(image_filename)
             img = Image.open(image_filename)
-            #if datatype == 'train':
-            img = img.resize((new_dim_train , new_dim_train))
-            if i == 1:
-                img.save('traintest.png')
+            if datatype == 'train':
+                img = img.resize((new_dim_train , new_dim_train))
+                if i == 1:
+                    img.save('traintest.png')
             img = numpy.asarray(img)
             imgs.append(img)
         else:
@@ -302,7 +303,7 @@ def extract_data_pixelwise(filename, num_images, datatype, new_dim_train=0):
 
 
 # Extract label images
-def extract_labels_pixelwise(filename, num_images, new_dim_train=400):
+def extract_labels_pixelwise(filename, num_images, new_dim_train):
     """Extract the labels into a 1-hot matrix [image index, label index]."""
     """ We want the images with depth = 2, one for each class, one of the depths is 1 and the other 0"""
     gt_imgs = []
@@ -338,14 +339,14 @@ def extract_labels_pixelwise(filename, num_images, new_dim_train=400):
 
 
 def load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE, new_dim_train):
-    x_test_img = extract_data_pixelwise(test_data_filename, TESTING_SIZE,  'test', new_dim_train =new_dim_train)
+    x_test_img = extract_data_pixelwise(test_data_filename, TESTING_SIZE,  'test', new_dim_train)
     x_test_img = numpy.transpose(x_test_img, (0, 3, 1, 2))
     print('Test data shape: ',x_test_img.shape)
 
-    x_train_img = extract_data_pixelwise(train_data_filename, TRAINING_SIZE,  'train', new_dim_train =new_dim_train)
+    x_train_img = extract_data_pixelwise(train_data_filename, TRAINING_SIZE,  'train', new_dim_train)
     x_train_img = numpy.transpose(x_train_img, (0, 3, 1, 2))
     print('Train data shape: ',x_train_img.shape)
-    y_train_img = extract_labels_pixelwise(train_labels_filename, TRAINING_SIZE, new_dim_train =new_dim_train)
+    y_train_img = extract_labels_pixelwise(train_labels_filename, TRAINING_SIZE, new_dim_train)
     y_train_img = numpy.transpose(y_train_img, (0, 3, 1, 2))
     print('Train labels shape: ',y_train_img.shape)
 
@@ -572,6 +573,78 @@ def get_prediction_with_overlay(filename, image_idx, datatype, model, IMG_PATCH_
 
     return oimg
 
+def save_overlay_and_prediction(filename, image_idx,datatype,model,IMG_PATCH_SIZE,PIXEL_DEPTH, prediction_training_dir):
+    i = image_idx
+    # Specify the path of the 
+    if (datatype == 'train'):
+        imageid = "satImage_%.3d" % image_idx
+        image_filename = filename + imageid + ".png"
+    elif (datatype == 'test'):
+        imageid = "/test_%d" % i
+        image_filename = filename + imageid + imageid + ".png"
+    else:
+        print('Error: Enter test or train')      
+
+    # loads the image in question
+    img = mpimg.imread(image_filename)
+
+    # Returns a vector with a prediction for each patch
+    output_prediction = get_prediction(img, model, IMG_PATCH_SIZE)
+    # Returns a representation of the image as a 2D vector with a label at each pixel
+    img_prediction = label_to_img(img.shape[0],img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
+
+    # Changes into a 3D array, to easier turn into image
+    predict_img_3c = numpy.zeros((img.shape[0],img.shape[1], 3), dtype=numpy.uint8)
+    predict_img8 = img_float_to_uint8(img_prediction, PIXEL_DEPTH)          
+    predict_img_3c[:,:,0] = predict_img8
+    predict_img_3c[:,:,1] = predict_img8
+    predict_img_3c[:,:,2] = predict_img8
+
+    imgpred = Image.fromarray(predict_img_3c)
+    oimg = make_img_overlay(img, img_prediction, PIXEL_DEPTH)
+
+    oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png")
+    imgpred.save(prediction_training_dir + "predictimg_" + str(i) + ".png")
+
+    return
+''' Not finished
+def save_overlay_and_prediction_pixel(filename, image_idx,datatype,model,IMG_PATCH_SIZE,PIXEL_DEPTH, prediction_training_dir):
+    i = image_idx
+    # Specify the path of the 
+    if (datatype == 'train'):
+        imageid = "satImage_%.3d" % image_idx
+        image_filename = filename + imageid + ".png"
+    elif (datatype == 'test'):
+        imageid = "/test_%d" % i
+        image_filename = filename + imageid + imageid + ".png"
+    else:
+        print('Error: Enter test or train')      
+
+    # loads the image in question
+    img = mpimg.imread(image_filename)
+
+    # Returns a vector with a prediction for each patch
+    output_prediction = get_prediction_pixel(img, model, NEW_DIM_TRAIN)
+    # Returns a representation of the image as a 2D vector with a label at each pixel
+    img_prediction = label_to_img(img.shape[0],img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
+
+    # Changes into a 3D array, to easier turn into image
+    predict_img_3c = numpy.zeros((img.shape[0],img.shape[1], 3), dtype=numpy.uint8)
+    predict_img8 = img_float_to_uint8(img_prediction, PIXEL_DEPTH)          
+    predict_img_3c[:,:,0] = predict_img8
+    predict_img_3c[:,:,1] = predict_img8
+    predict_img_3c[:,:,2] = predict_img8
+
+    imgpred = Image.fromarray(predict_img_3c)
+    oimg = make_img_overlay(img, img_prediction, PIXEL_DEPTH)
+
+    oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png")
+    imgpred.save(prediction_training_dir + "predictimg_" + str(i) + ".png")
+
+    return
+'''
+
+
 # Get prediction overlaid on the original image for given input file
 def get_prediction_with_overlay_unet(filename, image_idx, datatype, model, IMG_PATCH_SIZE, PIXEL_DEPTH):
 
@@ -600,9 +673,10 @@ def get_prediction_pixel(img, model, NEW_DIM_TRAIN):
     
     #img has shape (608, 608, 3)
     a = img
-    image = a.resize((NEW_DIM_TRAIN , NEW_DIM_TRAIN), refcheck=False)
+    #image = resize(img, (NEW_DIM_TRAIN , NEW_DIM_TRAIN,3))
+    image= a.resize((NEW_DIM_TRAIN , NEW_DIM_TRAIN))#, refcheck=False)
     #img has shape (224, 224, 3)
-
+    #image = img
     # Turns the image into matrix
     data = numpy.asarray(image)
     temp = numpy.zeros((1,NEW_DIM_TRAIN,NEW_DIM_TRAIN,3))
@@ -610,11 +684,11 @@ def get_prediction_pixel(img, model, NEW_DIM_TRAIN):
     data = numpy.transpose(temp, (0, 3, 1, 2))
 
     # now img has shape (1, 3, 224, 224)
-
+    #print("data",data.shape)
     # makes predictions on the image
     output_prediction = model.predict(data)
     output_prediction = output_prediction[:,0,:,:] # (1,224,224)
-    print('output_prediction: ', output_prediction.shape)
+    #print('output_prediction: ', output_prediction.shape)
     #output_prediction = numpy.squeeze(output_prediction, axis=0) #(1,224,224)
     #print('output_prediction: ', output_prediction.shape)
 
@@ -624,18 +698,19 @@ def get_prediction_pixel(img, model, NEW_DIM_TRAIN):
 
 
 def make_img_overlay_pixel(img, predicted_img, PIXEL_DEPTH):
-    w = img.shape[0]
-    h = img.shape[1]
-
+    #w = img.shape[0]
+    #h = img.shape[1]
+    w, h = img.size
+    #print(w,h)
     #pred_img = Image.fromarray(predicted_img)
     #pred_img = Image.fromarray(numpy.uint8(predicted_img*255))
     #print(shape.pred_img)
     #predicted_img = pred_img.resize((w,w))
     #predicted_img = numpy.asarray(predicted_img)
     #print('predicted img',predicted_img.shape)
-
+    predicted_img = numpy.asarray(predicted_img)
     color_mask = numpy.zeros((w, h, 3), dtype=numpy.uint8) #samme størrelse som bildet
-    color_mask[:,:,0] = predicted_img*PIXEL_DEPTH #0 eller 3 Endrer bare R i rgb, altså gjør bildet 
+    color_mask[:,:,0] = predicted_img[:,:,0]*PIXEL_DEPTH #0 eller 3 Endrer bare R i rgb, altså gjør bildet 
 
     img8 = img_float_to_uint8(img, PIXEL_DEPTH)
     background = Image.fromarray(img8, 'RGB').convert("RGBA")
@@ -668,7 +743,7 @@ def get_predictionimage_pixelwise(filename, image_idx, datatype, model, PIXEL_DE
 
     
     # Changes into a 3D array, to easier turn into image
-    predict_img_3c = numpy.zeros((img.shape[0],img.shape[1], 3), dtype=numpy.uint8)
+    predict_img_3c = numpy.zeros((predict_img.shape[1],predict_img.shape[2], 3), dtype=numpy.uint8)
     predict_img8 = img_float_to_uint8(predict_img, PIXEL_DEPTH)          
     predict_img_3c[:,:,0] = predict_img8
     predict_img_3c[:,:,1] = predict_img8
@@ -678,6 +753,61 @@ def get_predictionimage_pixelwise(filename, image_idx, datatype, model, PIXEL_DE
     imgpredict = imgpred.resize((608,608))
 
     return imgpredict
+
+def get_pred_and_ysubmit_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NEW_DIM_TRAIN, IMG_PATCH_SIZE, prediction_test_dir):
+
+    i = image_idx
+    # Specify the path of the 
+    if (datatype == 'train'):
+        imageid = "satImage_%.3d" % image_idx
+        image_filename = filename + imageid + ".png"
+    elif (datatype == 'test'):
+        imageid = "/test_%d" % i
+        image_filename = filename + imageid + imageid + ".png"
+    else:
+        print('Error: Enter test or train')      
+
+    # loads the image in question
+    #img = mpimg.imread(image_filename)
+    img = Image.open(image_filename)
+    #data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
+
+    output_prediction = get_prediction_pixel(img, model, NEW_DIM_TRAIN) #(1,224,224)
+    predict_img = output_prediction
+
+    #predict_img = label_to_img(img.shape[0],img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
+
+    #print(predict_img.shape)
+    # Changes into a 3D array, to easier turn into image
+    predict_img_3c = numpy.zeros((predict_img.shape[1],predict_img.shape[2], 3), dtype=numpy.uint8)
+    predict_img8 = img_float_to_uint8(predict_img, PIXEL_DEPTH)
+    #print(predict_img8)          
+    predict_img_3c[:,:,0] = predict_img8
+    predict_img_3c[:,:,1] = predict_img8
+    predict_img_3c[:,:,2] = predict_img8
+
+    imgpred = Image.fromarray(predict_img_3c)
+    #imgpred.save(prediction_test_dir + "small_" + str(i) + ".png")
+    imgpredict = imgpred.resize((608,608))
+    imgpredict.save(prediction_test_dir + "gtimg_" + str(i) + ".png")
+
+    img = mpimg.imread(prediction_test_dir + "gtimg_" + str(i) + ".png")
+
+
+    label_patches = img_crop(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE)
+    data = numpy.asarray(label_patches)#([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
+    labels = numpy.asarray([value_to_class(numpy.mean(data[i])) for i in range(len(data))])
+    #print("bilde",imgpredict.shape)
+    '''imgpredarr = numpy.asarray(imgpredict)
+    imgpredarr = numpy.transpose(imgpredarr, (0, 3, 1, 2))
+    print("array", imgpredarr.shape)
+    labels = numpy.zeros((1,608,608,2))
+
+    foreground_threshold = 0.5
+    labels[imgpredarr > foreground_threshold] = [1,0]
+    labels[imgpredarr <= foreground_threshold] = [0,1]'''
+
+    return labels, imgpredict
 
 def get_prediction_with_overlay_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NEW_DIM_TRAIN):
 
@@ -698,19 +828,25 @@ def get_prediction_with_overlay_pixelwise(filename, image_idx, datatype, model, 
     # Returns a matrix with a prediction for each pixel
     output_prediction = get_prediction_pixel(img, model, NEW_DIM_TRAIN) #(1,224,224)
     output_prediction = numpy.transpose(output_prediction, (1, 2, 0)) #(224,224,1)
-    print(output_prediction.shape)
+
+
+    predict_img_3c = numpy.zeros((output_prediction.shape[0],output_prediction.shape[1], 3), dtype=numpy.uint8)
+    predict_img8 = numpy.squeeze(img_float_to_uint8(output_prediction, PIXEL_DEPTH))       
+    predict_img_3c[:,:,0] = predict_img8
+    predict_img_3c[:,:,1] = predict_img8
+    predict_img_3c[:,:,2] = predict_img8
+
+    imgpred = Image.fromarray(predict_img_3c)
+    imgpredict = imgpred.resize((400,400))
     
-    
-    gtimg = get_predictionimage_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NEW_DIM_TRAIN)
+    #gtimg = get_predictionimage_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NEW_DIM_TRAIN)
+    #wpred,hpred = imgpredict.size
+    #w,h = img.size
+    #print("wpred: ", wpred, "hpred: ", hpred, "w", w, "h: ", h)
+    #img = mpimg.imread(image_filename) # Reads out the original image
+    oimg = make_img_overlay_pixel(img, imgpredict, PIXEL_DEPTH)
 
-
-
-
-
-    img = mpimg.imread(image_filename) # Reads out the original image
-    oimg = make_img_overlay_pixel(img, output_prediction, PIXEL_DEPTH)
-
-    return oimg, gtimg
+    return oimg, imgpredict
 
 
 #########
@@ -751,6 +887,27 @@ def prediction_to_submission(filename, y_submit):
                   strj='0'
 
               text = strj + str(j) + '_' + str(k) + '_' + str(l) + ',' + str(y_submit[i])
+              f.write(text)
+              f.write('\n')
+              i=i+1;
+
+def prediction_to_submission2(filename, y_submit):
+    with open(filename, 'w') as f:
+        f.write('id,prediction\n')
+        #for i in range(72200):
+        print(y_submit.shape)
+        i=0;
+        for j in range(1,50+1):
+          for k in range(0,593,16):
+            for l in range(0,593,16): 
+              strj = ''
+            
+              if len(str(j))<2:
+                strj='00'
+              elif len(str(j))==2:
+                  strj='0'
+
+              text = strj + str(j) + '_' + str(k) + '_' + str(l) + ',' + str(y_submit[i,0])
               f.write(text)
               f.write('\n')
               i=i+1;
