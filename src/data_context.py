@@ -11,9 +11,10 @@ from PIL import Image
 from pathlib import Path
 import shutil
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
-
-
-from helpers import augmentation, make_img_overlay, label_to_img, img_float_to_uint8
+from keras_pred import make_img_overlay
+from image_processing import img_float_to_uint8
+from keras_pred import label_to_img
+from image_augmentation import *
 import cv2 as cv2
 
 
@@ -100,7 +101,7 @@ def extract_aug_data_and_labels_context(filename, num_images, IMG_PATCH_SIZE, CO
     gt_imgs = []
     pathlist = Path(filename).glob('**/*.png')
     #goes through all the augmented images in image directory
-    # must pair them with all the augmented groundthruth images
+    # must pair them with all the augmented groundtruth images
     for path in pathlist:
         # because path is object not string
         image_path = str(path)
@@ -152,7 +153,7 @@ def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE):
     # Convert to dense 1-hot representation.
     return labels.astype(numpy.float32)
 
-def load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundThruthDir=''):
+def load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir=''):
 
     if augment == False:
         print('No augmenting of traing images')
@@ -165,7 +166,7 @@ def load_data_context(train_data_filename, train_labels_filename, test_data_file
         #print(y_train[:20])
     elif augment == True:
         print('Augmenting traing images...')
-        augmentation(data_dir, augImgDir, groundThruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG)
+        augmentation(data_dir, augImgDir, groundTruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG)
         x_train, y_train = extract_aug_data_and_labels_context(augImgDir, TRAINING_SIZE*(MAX_AUG+1), IMG_PATCH_SIZE, CONTEXT_SIZE)
 
     

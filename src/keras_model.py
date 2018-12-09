@@ -11,8 +11,14 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from mask_to_submission import *
 from helpers import *
+from image_processing import *
+from image_augmentation import *
 from F1_metrics import *
 from data_context import *
+from data_extraction import *
+from prediction import *
+from keras_pred import *
+from unet_pred import *
 
 import code
 import tensorflow.python.platform
@@ -42,12 +48,12 @@ from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_
 NUM_CHANNELS = 3 # RGB images
 PIXEL_DEPTH = 255
 NUM_LABELS = 2
-TRAINING_SIZE = 50
+TRAINING_SIZE = 5
 TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 10
+NUM_EPOCHS = 1
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 MAX_AUG = 1
@@ -66,14 +72,14 @@ test_data_filename = data_dir + 'test_set_images'
 
 # Directive for storing the augmented training images
 imgDir = data_dir + 'training/augmented/images'
-groundThruthDir = data_dir + 'training/augmented/groundtruth'
+groundTruthDir = data_dir + 'training/augmented/groundtruth'
 
 
 
 
 # Loading the data, and set wheter it is to be augmented or not
 x_train, y_train, x_test = load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE,
-          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundThruthDir =groundThruthDir) # The last 3 parameters can be blank when we dont want augmentation
+          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir) # The last 3 parameters can be blank when we dont want augmentation
 
 
 #x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE)
