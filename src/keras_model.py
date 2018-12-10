@@ -1,7 +1,7 @@
 from __future__ import print_function
 
-import matplotlib
-matplotlib.use('Agg')
+#import matplotlib
+#matplotlib.use('Agg')
 
 
 import gzip
@@ -12,8 +12,8 @@ import shutil
 import sys
 import urllib
 
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
+#import matplotlib.image as mpimg
+#import matplotlib.pyplot as plt
 from PIL import Image
 from mask_to_submission import *
 from helpers import *
