@@ -6,6 +6,7 @@ import sys
 import urllib
 import numpy as np
 import matplotlib.image as mpimg
+matplotlib.use('agg')
 from PIL import Image
 from pathlib import Path
 import shutil

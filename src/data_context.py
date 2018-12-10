@@ -7,6 +7,7 @@ import sys
 import urllib
 import numpy
 import matplotlib.image as mpimg
+matplotlib.use('agg')
 from PIL import Image
 from pathlib import Path
 import shutil
@@ -97,6 +98,7 @@ def extract_data_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE, dat
     #print("data",data.shape)
     #shape of returned = (width_image/num_patches * height_image/num_patches*num_images), patch_size, patch_size, 3
     return numpy.asarray(data)
+
 
 def extract_aug_data_and_labels_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE):
     """Extract the images into a 4D tensor [image index, y, x, channels].
