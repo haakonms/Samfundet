@@ -5,8 +5,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import sys
 import urllib
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.image as mpimg
-matplotlib.use('agg')
 from PIL import Image
 from pathlib import Path
 import shutil

@@ -6,10 +6,10 @@ import glob
 import shutil
 import sys
 import urllib
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.image as mpimg
-matplotlib.use('agg')
 import matplotlib.pyplot as plt
-matplotlib.use('agg')
 from PIL import Image
 from mask_to_submission import *
 from helpers import *
