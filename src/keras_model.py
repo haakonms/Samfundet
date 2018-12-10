@@ -141,7 +141,7 @@ if use_model == True:
 
 #model.load_weights(model_filename)
 model.compile(loss=keras.losses.categorical_crossentropy,
-          optimizer=keras.optimizers.Adadelta(),
+          optimizer=keras.optimizers.Adam(),
           metrics=['accuracy'])
 
 

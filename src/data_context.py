@@ -13,7 +13,7 @@ import shutil
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 
-from helpers import augmentation, make_img_overlay, label_to_img, img_float_to_uint8
+from helpers import augmentation, make_img_overlay, label_to_img, img_float_to_uint8, extract_labels, img_crop, value_to_class
 import cv2 as cv2
 
 
@@ -123,13 +123,13 @@ def extract_aug_data_and_labels_context(filename, num_images, IMG_PATCH_SIZE, CO
     
     # i = antall bilder, j = hvilken patch
     data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
-    gt_patches = [img_crop_context(gt_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE) for i in range(num_images)]
+    gt_patches = [img_crop(gt_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
     data_gt = numpy.asarray([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
-    labels = numpy.asarray([value_to_class_context(data_gt[i], IMG_PATCH_SIZE, CONTEXT_SIZE) for i in range(len(data_gt))])
+    labels = numpy.asarray([value_to_class(numpy.mean(data_gt[i])) for i in range(len(data_gt))])
 
     return numpy.asarray(data), labels.astype(numpy.float32)
 
-
+'''
 # Extract label images
 def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE):
     """Extract the labels into a 1-hot matrix [image index, label index]."""
@@ -151,7 +151,7 @@ def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE):
 
     # Convert to dense 1-hot representation.
     return labels.astype(numpy.float32)
-
+'''
 def load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundThruthDir=''):
 
     if augment == False:
@@ -161,7 +161,7 @@ def load_data_context(train_data_filename, train_labels_filename, test_data_file
         #print(x_train[:10])
 
         print('Loading training labels')
-        y_train = extract_labels_context(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE)
+        y_train = extract_labels(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE)
         #print(y_train[:20])
     elif augment == True:
         print('Augmenting traing images...')
