@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')
+
 from __future__ import print_function
 import gzip
 import os
@@ -6,8 +9,7 @@ import glob
 import shutil
 import sys
 import urllib
-import matplotlib
-matplotlib.use('Agg')
+
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from PIL import Image
