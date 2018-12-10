@@ -1,7 +1,9 @@
+from __future__ import print_function
+
 import matplotlib
 matplotlib.use('Agg')
 
-from __future__ import print_function
+
 import gzip
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
