@@ -20,13 +20,7 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 
 
 
-def value_to_class(v):
-    foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
-    df = np.sum(v)
-    if df > foreground_threshold:
-        return [0, 1]
-    else:
-        return [1, 0]
+
 
 
 

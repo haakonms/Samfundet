@@ -25,6 +25,7 @@ from data_extraction import *
 from prediction import *
 from keras_pred import *
 from unet_pred import *
+from justtesting import *
 
 import code
 import tensorflow.python.platform
@@ -54,12 +55,12 @@ from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_
 NUM_CHANNELS = 3 # RGB images
 PIXEL_DEPTH = 255
 NUM_LABELS = 2
-TRAINING_SIZE = 5
+TRAINING_SIZE = 100
 TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 1
+NUM_EPOCHS = 5
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 MAX_AUG = 1
@@ -84,9 +85,11 @@ groundTruthDir = data_dir + 'training/augmented/groundtruth'
 
 
 # Loading the data, and set wheter it is to be augmented or not
-x_train, y_train, x_test = load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE,
-          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir) # The last 3 parameters can be blank when we dont want augmentation
+#x_train, y_train, x_test = load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE,
+#          augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir) # The last 3 parameters can be blank when we dont want augmentation
 
+
+x_train, y_train, x_test = load_img_arrays()
 
 #x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE)
 
@@ -144,12 +147,13 @@ model.summary()
 
 
 use_model = False
-model_filename = 'weights/weights.best.context2.aug3.con16.hdf5'
+model_filename = 'weights/weights.best.con16.F71.hdf5'
 
 if use_model == True:
 
     model.load_weights(model_filename)
 
+model.load_weights(model_filename)
 
 #model.load_weights(model_filename)
 model.compile(loss=keras.losses.categorical_crossentropy,
