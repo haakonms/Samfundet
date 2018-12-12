@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 
 
 def img_crop(im, w, h):
@@ -37,3 +38,12 @@ def concatenate_images(img, gt_img):
         img8 = img_float_to_uint8(img)
         cimg = np.concatenate((img8, gt_img_3c), axis=1)
     return cimg
+
+def post_process(img):
+    kernel = np.ones((20,20),np.uint8)
+    img1 = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+    img2 = cv2.morphologyEx(img1, cv2.MORPH_OPEN, kernel)
+    
+    return img1
+
+

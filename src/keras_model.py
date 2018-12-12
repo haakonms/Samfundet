@@ -25,7 +25,7 @@ from data_extraction import *
 from prediction import *
 from keras_pred import *
 from unet_pred import *
-from justtesting import *
+#from justtesting import *
 
 import code
 import tensorflow.python.platform
@@ -60,7 +60,7 @@ TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 5
+NUM_EPOCHS = 10
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 MAX_AUG = 1
@@ -68,7 +68,7 @@ MAX_AUG = 1
 # The size of the patches each image is split into. Should be a multiple of 4, and the image
 # size would be a multiple of this. For this assignment to get the delivery correct it has to be 16
 IMG_PATCH_SIZE = 16
-CONTEXT_SIZE = 16
+CONTEXT_SIZE = 8
 
 
 # Extract data into numpy arrays, divided into patches of 16x16
@@ -85,11 +85,11 @@ groundTruthDir = data_dir + 'training/augmented/groundtruth'
 
 
 # Loading the data, and set wheter it is to be augmented or not
-#x_train, y_train, x_test = load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE,
-#          augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir) # The last 3 parameters can be blank when we dont want augmentation
+x_train, y_train, x_test = load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE,
+          augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir) # The last 3 parameters can be blank when we dont want augmentation
 
 
-x_train, y_train, x_test = load_img_arrays()
+#x_train, y_train, x_test = load_img_arrays()
 
 #x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE)
 
@@ -153,7 +153,7 @@ if use_model == True:
 
     model.load_weights(model_filename)
 
-model.load_weights(model_filename)
+#model.load_weights(model_filename)
 
 #model.load_weights(model_filename)
 model.compile(loss=keras.losses.categorical_crossentropy,
@@ -293,8 +293,21 @@ for i in range(1,TESTING_SIZE+1):
     #print(filename)
     #image_filenames.append(filename)
 
+new_test_filename = data_dir + 'test_set_post_images/'
+if not os.path.isdir(new_test_filename):
+    os.mkdir(new_test_filename)
 
-#submission_filename = 'keras_submission'
+y_submit_post = np.zeros((((608//IMG_PATCH_SIZE)**2)*TESTING_SIZE,2))
+for i in range(1,TESTING_SIZE+1):
+    #test_data_filename = data_dir + 'test_set_images'
+    
+    #oimg, gtimg = get_prediction_with_overlay_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN)
+    #oimg.save(prediction_test_dir + "overlay_" + str(i) + ".png")
+    y_submit_post[((608//IMG_PATCH_SIZE)**2)*(i-1):((608//IMG_PATCH_SIZE)**2)*i,:], p_img = get_pred_postprocessed(prediction_test_dir, i, 'test',IMG_PATCH_SIZE)
+    filename = new_test_filename + "processedimg_" + str(i) + ".png"
+    p_img.save(filename)
+
+prediction_to_submission2('submission_keras_test.csv', y_submit_post)
 #pred_to_submission(submission_filename,*image_filenames)    
 
 
