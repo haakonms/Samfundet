@@ -53,11 +53,11 @@ TESTING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 3
+NUM_EPOCHS = 1
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 MAX_AUG = 1
-NEW_DIM_TRAIN = 224
+NEW_DIM_TRAIN = 400
 
 # The size of the patches each image is split into. Should be a multiple of 4, and the image
 # size would be a multiple of this. For this assignment to get the delivery correct it has to be 16

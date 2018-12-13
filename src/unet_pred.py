@@ -17,12 +17,15 @@ def get_prediction_pixel(img, model, NEW_DIM_TRAIN):
     temp = np.zeros((1,NEW_DIM_TRAIN,NEW_DIM_TRAIN,3))
     temp[0,:,:,:] = data
     data = np.transpose(temp, (0, 3, 1, 2))
-
+    newdata = np.divide(data,255.0)
     # now img has shape (1, 3, 224, 224)
     #print("data",data.shape)
     # makes predictions on the image
-    output_prediction = model.predict(data)
-    output_prediction = output_prediction[:,0,:,:] # (1,224,224)
+    output_prediction = model.predict(newdata)
+    new_out = np.multiply(output_prediction,255.0)
+    output_prediction = new_out[:,0,:,:]
+    #output_prediction = output_prediction[:,0,:,:] # (1,224,224)
+
     #print('output_prediction: ', output_prediction.shape)
     #output_prediction = np.squeeze(output_prediction, axis=0) #(1,224,224)
     #print('output_prediction: ', output_prediction.shape)
@@ -101,26 +104,29 @@ def get_pred_and_ysubmit_pixelwise(filename, image_idx, datatype, model, PIXEL_D
         image_filename = filename + imageid + imageid + ".png"
     else:
         print('Error: Enter test or train')      
-
+    print(image_filename)
     # loads the image in question
     #img = mpimg.imread(image_filename)
     img = Image.open(image_filename)
     #data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
-
+    #arrimg = np.array(img)
+    #print(arrimg)
+    #img = np.divide(arrimg,255.0)
     output_prediction = get_prediction_pixel(img, model, NEW_DIM_TRAIN) #(1,224,224)
     predict_img = output_prediction
 
     #predict_img = label_to_img(img.shape[0],img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
-
+    predict_img = np.transpose(predict_img, (1, 2, 0)) #(224,224,1)
     #print(predict_img.shape)
     # Changes into a 3D array, to easier turn into image
-    predict_img_3c = np.zeros((predict_img.shape[1],predict_img.shape[2], 3), dtype=np.uint8)
-    predict_img8 = img_float_to_uint8(predict_img, PIXEL_DEPTH)
+    predict_img_3c = np.zeros((predict_img.shape[0],predict_img.shape[1], 3), dtype=np.uint8)
+    predict_img8 = np.squeeze(img_float_to_uint8(predict_img, PIXEL_DEPTH))
     #print(predict_img8)          
     predict_img_3c[:,:,0] = predict_img8
     predict_img_3c[:,:,1] = predict_img8
     predict_img_3c[:,:,2] = predict_img8
-
+    #np.uint8
+    #imgpred = Image.fromarray(np.multiply(predict_img_3c,255.0))
     imgpred = Image.fromarray(predict_img_3c)
     #imgpred.save(prediction_test_dir + "small_" + str(i) + ".png")
     imgpredict = imgpred.resize((608,608))

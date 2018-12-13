@@ -51,14 +51,14 @@ def ZF_UNET_224(weights, input_shape=0):
     pool_14 = MaxPooling2D(pool_size=(2, 2),strides=(2, 2), data_format=IMAGE_ORDERING)(conv_28)
 
     conv_14 = Conv2D(16*filters, (3, 3), padding='same', data_format=IMAGE_ORDERING)(pool_14)
-    pool_7 = MaxPooling2D(pool_size=(2, 2),strides=(2, 2), data_format=IMAGE_ORDERING)(conv_14)
+    '''pool_7 = MaxPooling2D(pool_size=(2, 2),strides=(2, 2), data_format=IMAGE_ORDERING)(conv_14)
 
     conv_7 = Conv2D(32*filters, (3, 3), padding='same', data_format=IMAGE_ORDERING)(pool_7)
    
     up_14 = concatenate([UpSampling2D(size=(2, 2),data_format=IMAGE_ORDERING)(conv_7), conv_14], axis=axis)
     up_conv_14 = Conv2D(16*filters, (3, 3), padding='same', data_format=IMAGE_ORDERING)(up_14)
-
-    up_28 = concatenate([UpSampling2D(size=(2, 2),data_format=IMAGE_ORDERING)(up_conv_14), conv_28], axis=axis)
+    '''
+    up_28 = concatenate([UpSampling2D(size=(2, 2),data_format=IMAGE_ORDERING)(conv_14), conv_28], axis=axis)
     up_conv_28 = Conv2D(8*filters, (3, 3), padding='same', data_format=IMAGE_ORDERING)(up_28)
 
     up_56 = concatenate([UpSampling2D(size=(2, 2),data_format=IMAGE_ORDERING)(up_conv_28), conv_56], axis=axis)
@@ -73,13 +73,13 @@ def ZF_UNET_224(weights, input_shape=0):
     conv_final = Conv2D(OUTPUT_MASK_CHANNELS, (1, 1),data_format=IMAGE_ORDERING)(up_conv_224)
     conv_final = Activation('softmax')(conv_final)
 
-    if weights == 'generator' and axis == 3 and INPUT_CHANNELS == 3 and OUTPUT_MASK_CHANNELS == 1:
+    '''if weights == 'generator' and axis == 3 and INPUT_CHANNELS == 3 and OUTPUT_MASK_CHANNELS == 1:
         weights_path = get_file(
             'zf_unet_224_weights_tf_dim_ordering_tf_generator.h5',
             ZF_UNET_224_WEIGHT_PATH,
             cache_subdir='models',
             file_hash='203146f209baf34ac0d793e1691f1ab7')
-        model.load_weights(weights_path)
+        model.load_weights(weights_path)'''
 
 
     model = Model(inputs, conv_final, name="ZF_UNET_224")
