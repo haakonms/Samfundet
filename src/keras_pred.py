@@ -1,6 +1,9 @@
 import numpy as np
-from image_processing import img_float_to_uint8
+from image_processing import img_float_to_uint8, post_process, img_crop
+from data_extraction import *
 from PIL import Image
+import cv2
+
 
 def make_img_binary(img, predicted_img):
     w = img.shape[0]
@@ -151,3 +154,43 @@ def save_overlay_and_prediction(filename, image_idx,datatype,model,IMG_PATCH_SIZ
     imgpred.save(prediction_training_dir + "predictimg_" + str(i) + ".png")
 
     return
+
+def get_pred_postprocessed(filename, image_idx, datatype, IMG_PATCH_SIZE):
+
+    i = image_idx
+    # Specify the path of the 
+    if (datatype == 'train'):
+        imageid = "satImage_%.3d" % image_idx
+        image_filename = filename + imageid + ".png"
+    elif (datatype == 'test'):
+        #filename = prediction_test_dir + "predictimg_" + str(i) + ".png"
+        imageid = "predictimg_%d" % i
+        image_filename = filename + imageid + ".png"
+    else:
+        print('Error: Enter test or train')      
+    #print(image_filename)
+    # loads the image in question
+    #img = mpimg.imread(image_filename)
+    img = cv2.imread(image_filename, cv2.IMREAD_GRAYSCALE)
+    #print(img.shape)
+    #rgbimg = cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
+    #print(rgbimg.shape)
+    p_img = post_process(img)
+    #data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
+
+
+    label_patches = img_crop(p_img, IMG_PATCH_SIZE, IMG_PATCH_SIZE)
+    data = np.asarray(label_patches)#([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
+    labels = np.asarray([value_to_class(np.mean(data[i])) for i in range(len(data))])
+    #print("bilde",imgpredict.shape)
+    img_post = Image.fromarray(p_img)
+    '''imgpredarr = np.asarray(imgpredict)
+    imgpredarr = np.transpose(imgpredarr, (0, 3, 1, 2))
+    print("array", imgpredarr.shape)
+    labels = np.zeros((1,608,608,2))
+
+    foreground_threshold = 0.5
+    labels[imgpredarr > foreground_threshold] = [1,0]
+    labels[imgpredarr <= foreground_threshold] = [0,1]'''
+
+    return labels, img_post

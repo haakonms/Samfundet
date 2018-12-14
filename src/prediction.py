@@ -58,7 +58,7 @@ def prediction_to_submission2(filename, y_submit):
               elif len(str(j))==2:
                   strj='0'
 
-              text = strj + str(j) + '_' + str(k) + '_' + str(l) + ',' + str(y_submit[i,0])
+              text = strj + str(j) + '_' + str(k) + '_' + str(l) + ',' + str(int(y_submit[i,1]))
               f.write(text)
               f.write('\n')
               i=i+1;
