@@ -3,6 +3,7 @@ import os
 import skimage.io as io
 import skimage.transform as trans
 import numpy as np
+import random
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
@@ -14,28 +15,33 @@ from pathlib import Path
 
 from keras.utils.data_utils import get_file
 
-def load_data_unet(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE, new_dim_train,augment=False,MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir=''):
+def load_data_unet(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE,VALIDATION_SIZE, new_dim_train,augment=False,MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir=''):
+    
+    idx = random.sample(range(1, 100), VALIDATION_SIZE)
     if augment == False:
-        print('No augmenting of traing images')
+        print('No augmenting of training images')
         print('\nLoading training images')
-        x_train_img = extract_data_pixelwise(train_data_filename, TRAINING_SIZE,  'train', new_dim_train)
+        x_train, x_val = extract_data_pixelwise(train_data_filename,TRAINING_SIZE,  'train', new_dim_train,idx)
         print('Train data shape: ',x_train_img.shape)
-        y_train_img = extract_labels_pixelwise(train_labels_filename, TRAINING_SIZE, new_dim_train)
+        y_train, y_val = extract_labels_pixelwise(train_labels_filename,TRAINING_SIZE, new_dim_train,idx)
         print('Train labels shape: ',y_train_img.shape)
     elif augment == True:
-        print('Augmenting traing images...')
-        augmentation(data_dir, augImgDir, groundTruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG)
-        x_train_img, y_train_img = extract_aug_data_and_labels_pixelwise(augImgDir, TRAINING_SIZE*(MAX_AUG+1))
+        print('Augmenting training images...')
 
-    x_test_img = extract_data_pixelwise(test_data_filename, TESTING_SIZE,  'test', new_dim_train)
-    print('Test data shape: ',x_test_img.shape)
-    road = np.sum(y_train_img[:,:,:,1], dtype = int)
-    background = np.sum(y_train_img[:,:,:,0], dtype = int)
+        augmentation(data_dir, augImgDir, groundTruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG,idx)
+        x_train, y_train = extract_aug_data_and_labels_pixelwise(augImgDir)#, TRAINING_SIZE*(MAX_AUG+1))
+        _, x_val = extract_data_pixelwise(train_data_filename,TRAINING_SIZE, 'train', new_dim_train,idx)
+        _, y_val = extract_labels_pixelwise(train_labels_filename,TRAINING_SIZE, new_dim_train,idx)
+
+    x_test,_ = extract_data_pixelwise(test_data_filename,TESTING_SIZE,  'test', new_dim_train)
+    print('Test data shape: ',x_test.shape)
+    road = np.sum(y_train[:,:,:,1], dtype = int)
+    background = np.sum(y_train[:,:,:,0], dtype = int)
     print('Number of samples in class 1 (background): ',road)
     print('Number of samples in class 2 (road): ',background, '\n')
 
 
-    return x_train_img, y_train_img, x_test_img
+    return x_train, y_train, x_test, x_val, y_val
 
 NEW_DIM_TRAIN = 400
 INPUT_CHANNELS = 3

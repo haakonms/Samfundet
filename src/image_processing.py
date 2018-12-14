@@ -6,8 +6,6 @@ def img_crop(im, w, h):
     list_patches = []
     imgwidth = im.shape[0]
     imgheight = im.shape[1]
-    #print('IMGWIDTH: ', imgwidth)
-    #print('IMGHEIGHT: ',  imgheight)
     is_2d = len(im.shape) < 3
     for i in range(0,imgheight,h):
         for j in range(0,imgwidth,w):
@@ -40,10 +38,10 @@ def concatenate_images(img, gt_img):
     return cimg
 
 def post_process(img):
-    kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT,(1,33))
-    kernel1 = cv2.getStructuringElement(cv2.MORPH_RECT,(33,1))
-    kernel3 = cv2.getStructuringElement(cv2.MORPH_RECT,(33,1))
-    kernel4 = cv2.getStructuringElement(cv2.MORPH_RECT,(1,33))
+    kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT,(1,17))
+    kernel1 = cv2.getStructuringElement(cv2.MORPH_RECT,(17,1))
+    kernel3 = cv2.getStructuringElement(cv2.MORPH_RECT,(17,1))
+    kernel4 = cv2.getStructuringElement(cv2.MORPH_RECT,(1,17))
     img1 = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel1)
     img2 = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel2)
 
@@ -52,6 +50,6 @@ def post_process(img):
     img4 = cv2.morphologyEx(img_open, cv2.MORPH_CLOSE, kernel4)
     img_close = cv2.bitwise_or(img3, img4)
     
-    return img1
+    return img_close
 
 
