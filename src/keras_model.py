@@ -68,7 +68,7 @@ MAX_AUG = 1
 # The size of the patches each image is split into. Should be a multiple of 4, and the image
 # size would be a multiple of this. For this assignment to get the delivery correct it has to be 16
 IMG_PATCH_SIZE = 16
-CONTEXT_SIZE = 8
+CONTEXT_SIZE = 16
 
 
 # Extract data into numpy arrays, divided into patches of 16x16
@@ -87,7 +87,7 @@ groundTruthDir = data_dir + 'training/augmented/groundtruth'
 # Loading the data, and set wheter it is to be augmented or not
 
 x_train, y_train, x_test, x_val, y_val = load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, VALIDATION_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE,
-          augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir, newaugment=True) # The last 3 parameters can be blank when we dont want augmentation
+          saltpepper = 0.05, augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir, newaugment=True) # The last 3 parameters can be blank when we dont want augmentation
 
 #(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, VALIDATION_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir='', newaugment=True)
 

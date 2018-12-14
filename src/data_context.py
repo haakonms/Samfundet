@@ -1,4 +1,5 @@
 
+
 from __future__ import print_function
 import gzip
 import os
@@ -27,48 +28,31 @@ import random
 
 
 
-def img_crop_context(im, w, h, IMG_PATCH_SIZE, w_context):
+def img_crop_context(im, w, h, w_context):
     list_patches = []
     imgwidth = im.shape[0]
     imgheight = im.shape[1]
     #print('IMGWIDTH: ', imgwidth)
     #print('IMGHEIGHT: ',  imgheight)
     is_2d = len(im.shape) < 3
-    if is_2d:
-        print(is_2d)
-
-    #w = 8
-    #h = 8
     
     # creates the image with reflected edges
     im_reflect = cv2.copyMakeBorder(im, w_context, w_context, w_context, w_context, cv2.BORDER_REFLECT)
-    a = 1
-    for i in range(w_context,imgheight+w_context,h): # iterates through the 0th axis
-        for j in range(w_context,imgwidth+w_context,w): # iterates through the 1th axis
+
+    for i in range(0+w_context,imgheight+w_context,h): # iterates through the 0th axis
+        for j in range(0+w_context,imgwidth+w_context,w): # iterates through the 1th axis
             
             l = j - w_context # left
-            r = j + IMG_PATCH_SIZE + w_context # right
+            r = j + w + w_context # right
             t = i - w_context # bottom
-            b = i + IMG_PATCH_SIZE + w_context # top
-
-            #if (a==1):
-            #    print(l, ' ', r, ' ', t, ' ', b, ' ')
-
-            #a+=1
+            b = i + h + w_context # top
             
+
             if is_2d:
                 im_patch = im_reflect[l:r, t:b]
             else:
                 im_patch = im_reflect[l:r, t:b, :]
-            if a ==1:
-                print(np.shape(im_patch))
             list_patches.append(im_patch)
-
-            if a==1:
-                print('t_' ,list_patches[-1].shape)
-
-            a+=1
-
     return list_patches
 
 
@@ -83,6 +67,10 @@ def value_to_class_context(patch, IMG_PATCH_SIZE, CONTEXT_SIZE):
         return [0, 1]
     else:
         return [1, 0]
+
+
+
+
 
 def extract_data_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE, datatype, val_img=[]):
     """Extract the images into a 4D tensor [image index, y, x, channels].
@@ -128,17 +116,13 @@ def extract_data_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE, dat
 
     num_t_images = len(t_imgs)
     num_v_images = len(v_imgs)
-    new_patch = 8
     IMG_WIDTH = t_imgs[0].shape[0]
     IMG_HEIGHT = t_imgs[0].shape[1]
     #N_PATCHES_PER_IMAGE = (IMG_WIDTH/IMG_PATCH_SIZE)*(IMG_HEIGHT/IMG_PATCH_SIZE)
 
     # makes a list of all patches for the image at each index
-    if datatype=='train':
-        train_img_patches = [img_crop_context(t_imgs[i], new_patch, new_patch, IMG_PATCH_SIZE, CONTEXT_SIZE) for i in range(num_t_images)]
-    else:
-        train_img_patches = [img_crop_context(t_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE) for i in range(num_t_images)]
-    val_img_patches = [img_crop_context(v_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE) for i in range(num_v_images)]
+    train_img_patches = [img_crop_context(t_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE) for i in range(num_t_images)]
+    val_img_patches = [img_crop_context(v_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE) for i in range(num_v_images)]
     # "unpacks" the vectors for each image into a shared vector, where the entire vector for image 1 comes
     # befor the entire vector for image 2
     # i = antall bilder, j = hvilken patch
@@ -173,21 +157,18 @@ def extract_aug_data_and_labels_context(filename, num_images, IMG_PATCH_SIZE, CO
         gt_imgs.append(g_img)
 
     num_images = len(imgs)
-    new_patch = 8
     IMG_WIDTH = imgs[0].shape[0]
     IMG_HEIGHT = imgs[0].shape[1]
     N_PATCHES_PER_IMAGE = (IMG_WIDTH/IMG_PATCH_SIZE)*(IMG_HEIGHT/IMG_PATCH_SIZE)
     # makes a list of all patches for the image at each index
-    img_patches = [img_crop_context(imgs[i], new_patch, new_patch, IMG_PATCH_SIZE, CONTEXT_SIZE) for i in range(num_images)]
+    img_patches = [img_crop_context(imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE) for i in range(num_images)]
     
     # "unpacks" the vectors for each image into a shared vector, where the entire vector for image 1 comes
     # befor the entire vector for image 2
     
-    
-
     # i = antall bilder, j = hvilken patch
     data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
-    gt_patches = [img_crop(gt_imgs[i], new_patch, new_patch) for i in range(num_images)]
+    gt_patches = [img_crop(gt_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
     data_gt = numpy.asarray([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
     labels = numpy.asarray([value_to_class(numpy.mean(data_gt[i])) for i in range(len(data_gt))])
 
@@ -226,7 +207,7 @@ def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, val_img=[]):
 
     num_t_images = len(t_imgs)
     num_v_images = len(v_imgs)
-    t_patches = [img_crop(t_imgs[i], 8, 8) for i in range(num_t_images)]
+    t_patches = [img_crop(t_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_t_images)]
     v_patches = [img_crop(v_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_v_images)]
 
     t_data = np.asarray([t_patches[i][j] for i in range(len(t_patches)) for j in range(len(t_patches[i]))])
@@ -236,13 +217,69 @@ def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, val_img=[]):
     t_labels = numpy.asarray([value_to_class(np.mean(t_data[i])) for i in range(len(t_data))])
     v_labels = numpy.asarray([value_to_class(np.mean(v_data[i])) for i in range(len(v_data))])
 
+    #t_labels = [sp_noise_img(t_labels[i]) for i in range(len(t_data))]
+
     # Convert to dense 1-hot representation.
     return t_labels.astype(np.float32), v_labels.astype(np.float32)
 
 
+def sp_noise(images, s_vs_p = 0.5, amount = 0.004):
+        # n_img, row, col, ch = images.shape
+        
+        # out_images = np.zeros((images.shape))
+        # for i in range(n_img):
+
+        #     image = images[i,:,:,:]
+        #     print(np.shape(image))
+        #     out_images[i,:,:,:] = image
+            
+        #     # Add Salt
+        #     num_salt = np.ceil(amount * image.size * s_vs_p)
+        #     idx = [np.random.randint(0, j - 1, int(num_salt)) for j in image.shape[1:2]]
+        #     #print(np.shape(idx))
+        #     out_images[i,idx] = 1
+
+        #     # Add Pepper
+        #     num_pepper = np.ceil(amount* image.size * (1. - s_vs_p))
+        #     coords = [np.random.randint(0, j - 1, int(num_pepper)) for j in image.shape[1:2]]
+        #     out_images[i,coords] = 0
+        
+        # return out_images
+
+        n_img,row,col,ch = images.shape
+
+        outs = images
+
+        for j in range(n_img):
+            out = outs[j,:,:,:]
+
+            # Salt mode
+            num_salt = np.ceil(amount * out.size * s_vs_p)
+            w_ind = np.random.randint(0, col-1, int(num_salt))
+            h_ind = np.random.randint(0, row-1, int(num_salt))
+
+            out[h_ind, w_ind, :] = [0,0,0]
+
+            # Pepper mode
+            num_pepper = np.ceil(amount* out.size * (1. - s_vs_p))
+            w_ind = np.random.randint(0, col-1, int(num_pepper))
+            h_ind = np.random.randint(0, row-1, int(num_pepper))
+
+            out[h_ind, w_ind, :] = [1,1,1]
+            # for w in w_ind:
+            #     for h in h_ind:
+            #         out[w,h,:] = [0,0,0]
+
+            outs[j,:,:,:] = out
+        
+    
+
+        return outs
 
 
-def load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, VALIDATION_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir='', newaugment=True):
+
+
+def load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, VALIDATION_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE, saltpepper = 0.004, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir='', newaugment=True):
 
 
     idx = random.sample(range(1, 100), VALIDATION_SIZE)
@@ -270,6 +307,8 @@ def load_data_context(train_data_filename, train_labels_filename, test_data_file
         _, y_val = extract_labels_context(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE, idx)
 
     
+    x_train = sp_noise(x_train, amount=saltpepper)
+
     print('Loading test images\n')
     x_test, _ = extract_data_context(test_data_filename,TESTING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, 'test')
     #print(x_test[:10])
@@ -298,7 +337,7 @@ def load_data_context(train_data_filename, train_labels_filename, test_data_file
 def get_prediction_context(img, model, IMG_PATCH_SIZE, CONTEXT_SIZE):
     
     # Turns the image into its data patches
-    data = numpy.asarray(img_crop_context(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE))
+    data = numpy.asarray(img_crop_context(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE))
     #shape ((38*38), 16,16,3)
 
     # Data now is a vector of the patches from one single image in the testing data
@@ -381,4 +420,5 @@ def get_predictionimage_context(filename, image_idx, datatype, model, IMG_PATCH_
     imgpred = Image.fromarray(predict_img_3c)
 
     return imgpred
+
 
