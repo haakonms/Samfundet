@@ -46,7 +46,7 @@ def label_to_img_unet(imgwidth, imgheight, w, h, output_prediction,datatype):
             predict_img[j:j+w, i:i+h,1] = val#np.mean(output_prediction[j:j+w, i:i+h,1])
             predict_img[j:j+w, i:i+h,2] = val#np.mean(output_prediction[j:j+w, i:i+h,2])
             #list_patches.append(im_patch)
-    print(predict_img)
+    #print(predict_img)
     return predict_img
     
 
@@ -128,7 +128,7 @@ def get_pred_and_ysubmit_pixelwise(filename, image_idx, datatype, model, PIXEL_D
         image_filename = filename + imageid + imageid + ".png"
     else:
         print('Error: Enter test or train')      
-    print(image_filename)
+    #print(image_filename)
     # loads the image in question
     #img = mpimg.imread(image_filename)
     img = Image.open(image_filename)

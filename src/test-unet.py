@@ -73,7 +73,7 @@ test_data_filename = data_dir + 'test_set_images'
 
 # Directive for storing the augmented training images
 imgDir = data_dir + 'training/augmented/images'
-groundThruthDir = data_dir + 'training/augmented/groundtruth'
+groundTruthDir = data_dir + 'training/augmented/groundtruth'
 
 
 
@@ -84,7 +84,8 @@ groundThruthDir = data_dir + 'training/augmented/groundtruth'
 
 
 #x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE, NEW_DIM_TRAIN)
-x_train_img, y_train_img, x_test_img = load_data_unet(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE, NEW_DIM_TRAIN)
+x_train_img, y_train_img, x_test_img = load_data_unet(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE, NEW_DIM_TRAIN,
+  augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir)
 
 x_train = x_train_img
 y_train = y_train_img
@@ -204,8 +205,6 @@ if not os.path.isdir(prediction_test_dir):
     os.mkdir(prediction_test_dir)
 y_submit = np.zeros((((608//IMG_PATCH_SIZE)**2)*TESTING_SIZE,2))
 for i in range(1,TESTING_SIZE+1):
-  #oimg, gtimg = get_prediction_with_overlay_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN)
-  #oimg.save(prediction_test_dir + "overlay_" + str(i) + ".png")
   #y_submit[((608//IMG_PATCH_SIZE)**2)*(i-1):((608//IMG_PATCH_SIZE)**2)*i,:], gtimg = get_pred_and_ysubmit_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN,IMG_PATCH_SIZE,prediction_test_dir)
   gtimg = get_pred_and_ysubmit_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN,IMG_PATCH_SIZE,prediction_test_dir)
   gtimg.save(prediction_test_dir + "gtimg_" + str(i) + ".png")
