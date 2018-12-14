@@ -25,7 +25,7 @@ from data_extraction import *
 from prediction import *
 from keras_pred import *
 from unet_pred import *
-from justtesting import *
+#from justtesting import *
 
 import code
 import tensorflow.python.platform
@@ -57,7 +57,7 @@ PIXEL_DEPTH = 255
 NUM_LABELS = 2
 TRAINING_SIZE = 100
 TESTING_SIZE = 50
-VALIDATION_SIZE = 5  # Size of the validation set.
+VALIDATION_SIZE = 10  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
 NUM_EPOCHS = 5
@@ -85,11 +85,17 @@ groundTruthDir = data_dir + 'training/augmented/groundtruth'
 
 
 # Loading the data, and set wheter it is to be augmented or not
-#x_train, y_train, x_test = load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE,
-#          augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir) # The last 3 parameters can be blank when we dont want augmentation
+x_train, y_train, x_test, x_val, y_val = load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, VALIDATION_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE,
+          augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir, newaugment=True) # The last 3 parameters can be blank when we dont want augmentation
 
+#(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, VALIDATION_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir='', newaugment=True)
 
-x_train, y_train, x_test = load_img_arrays()
+# print(np.mean(x_train))
+# print(np.max(x_train))
+# print(np.min(x_train))
+# print(np.mean(x_test))
+
+#x_train, y_train, x_test = load_img_arrays()
 
 #x_train_img, y_train_img, x_test_img = load_data_img(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE)
 
@@ -119,7 +125,7 @@ input_shape = (img_rows, img_cols, NUM_CHANNELS)
 ordering = 'channels_last'
 
 model = Sequential()
-
+'''
 model.add(Conv2D(32, kernel_size=(3, 3), activation='relu',input_shape=input_shape, padding="same", data_format=ordering)) #32 is number of outputs from that layer, kernel_size is filter size, 
 model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding="same", data_format=ordering))
 #model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding="same", data_format=ordering))
@@ -140,14 +146,42 @@ model.add(Dropout(0.25))
 model.add(Flatten())
 model.add(Dense(1024, activation='relu'))
 model.add(Dropout(0.5))
+model.add(Dense(NUM_LABELS, activation='softmax'))'''
+
+model.add(Conv2D(64, kernel_size=(3, 3), activation='relu',input_shape=input_shape, padding="same", data_format=ordering)) #32 is number of outputs from that layer, kernel_size is filter size, 
+#model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding="same", data_format=ordering))
+#model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding="same", data_format=ordering))
+model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(128, (3, 3), activation='relu', padding="same", data_format=ordering))
+#model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
+#model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
+model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(256, (3, 3), activation='relu', padding="same", data_format=ordering))
+#model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
+#model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
+model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
+model.add(Dropout(0.25))
+
+#model.add(Conv2D(128, (2, 2), activation='relu', padding="same", data_format=ordering))
+#model.add(Conv2D(128, (2, 2), activation='relu', padding="same", data_format=ordering))
+#model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
+#model.add(Dropout(0.25))
+
+model.add(Flatten())
+model.add(Dense(256, activation='relu'))
+model.add(Dropout(0.5))
 model.add(Dense(NUM_LABELS, activation='softmax'))
 
 model.summary()
 
 
 
-use_model = False
-model_filename = 'weights/weights.best.con16.F71.hdf5'
+use_model = True
+model_filename = 'weights/weights.best.drive.hdf5'
 
 if use_model == True:
 
