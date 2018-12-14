@@ -12,19 +12,20 @@ from keras import backend as keras
 from data_extraction import *
 from image_augmentation import *
 from pathlib import Path
+from data_context import sp_noise
 
 from keras.utils.data_utils import get_file
 
-def load_data_unet(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE,VALIDATION_SIZE, new_dim_train,augment=False,MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir=''):
+def load_data_unet(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE,VALIDATION_SIZE, new_dim_train,saltpepper = 0.004,augment=False,MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir=''):
     
     idx = random.sample(range(1, 100), VALIDATION_SIZE)
     if augment == False:
         print('No augmenting of training images')
         print('\nLoading training images')
         x_train, x_val = extract_data_pixelwise(train_data_filename,TRAINING_SIZE,  'train', new_dim_train,idx)
-        print('Train data shape: ',x_train_img.shape)
+        print('Train data shape: ',x_train.shape)
         y_train, y_val = extract_labels_pixelwise(train_labels_filename,TRAINING_SIZE, new_dim_train,idx)
-        print('Train labels shape: ',y_train_img.shape)
+        print('Train labels shape: ',y_train.shape)
     elif augment == True:
         print('Augmenting training images...')
 
@@ -33,6 +34,7 @@ def load_data_unet(train_data_filename, train_labels_filename, test_data_filenam
         _, x_val = extract_data_pixelwise(train_data_filename,TRAINING_SIZE, 'train', new_dim_train,idx)
         _, y_val = extract_labels_pixelwise(train_labels_filename,TRAINING_SIZE, new_dim_train,idx)
 
+    x_train = sp_noise(x_train, amount=saltpepper)
     x_test,_ = extract_data_pixelwise(test_data_filename,TESTING_SIZE,  'test', new_dim_train)
     print('Test data shape: ',x_test.shape)
     road = np.sum(y_train[:,:,:,1], dtype = int)

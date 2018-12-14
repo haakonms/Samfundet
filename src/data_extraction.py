@@ -160,7 +160,7 @@ def extract_data_pixelwise(filename,num_images, datatype, new_dim_train,val_img=
     
     t_arr =np.array(t_imgs)
     v_arr = np.array(v_imgs) 
-    print("datapixelwise",t_arr.shape,v_arr.shape)
+    #print("datapixelwise",t_arr.shape,v_arr.shape)
 
     return t_arr,v_arr
 

@@ -26,7 +26,7 @@ def label_to_img_unet(imgwidth, imgheight, w, h, output_prediction,datatype):
             
             #already made black and white
             meanval = np.mean(output_prediction[j:j+w, i:i+h,0])
-            if meanval>=100:
+            if meanval>=128:
                 val = 255
             else:
                 val = 0

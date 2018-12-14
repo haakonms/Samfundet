@@ -19,10 +19,10 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
 
     seed = 0
     datagenImg = ImageDataGenerator(
-            rotation_range=180, #in radians
+            rotation_range=90, #in radians
             zoom_range=0.4,
             fill_mode= 'reflect',
-            #brightness_range=(0,2))
+            brightness_range=(0,2),
             vertical_flip=True,
             horizontal_flip=True
             #shear_range=0.25,
@@ -31,10 +31,10 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
             #channel_shift_range=10,
             )
     datagenGT = ImageDataGenerator(
-            rotation_range=180, #in radians
+            rotation_range=90, #in radians
             zoom_range=0.4,
             fill_mode= 'reflect',
-            #brightness_range=(0,2))
+            brightness_range=(0,2),
             vertical_flip=True,
             horizontal_flip=True
             #shear_range=0.25,
