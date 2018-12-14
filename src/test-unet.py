@@ -112,7 +112,7 @@ img_rows = x_train[0].shape[1]
 img_cols = img_rows
 print(img_rows)
 #input_shape = (NUM_CHANNELS, img_rows, img_cols) 
-yweight = y_train[:,0,:,:]
+yweight = y_train[:,:,:,0]
 yweight = yweight.flatten()
 print(np.unique(yweight), sum(yweight))
 class_weights = class_weight.compute_class_weight('balanced',
@@ -206,8 +206,9 @@ if not os.path.isdir(prediction_test_dir):
 y_submit = np.zeros((((608//IMG_PATCH_SIZE)**2)*TESTING_SIZE,2))
 for i in range(1,TESTING_SIZE+1):
   #y_submit[((608//IMG_PATCH_SIZE)**2)*(i-1):((608//IMG_PATCH_SIZE)**2)*i,:], gtimg = get_pred_and_ysubmit_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN,IMG_PATCH_SIZE,prediction_test_dir)
-  gtimg = get_pred_and_ysubmit_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN,IMG_PATCH_SIZE,prediction_test_dir)
+  gtimg,orImg = get_pred_and_ysubmit_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN,IMG_PATCH_SIZE,prediction_test_dir)
   gtimg.save(prediction_test_dir + "gtimg_" + str(i) + ".png")
+  #overlay.save(prediction_test_dir + "overlay_" + str(i) + ".png")
   gtarr = np.asarray(gtimg)
   #print(gtarr)
   label_patches = img_crop(gtarr, IMG_PATCH_SIZE, IMG_PATCH_SIZE)
@@ -217,8 +218,14 @@ for i in range(1,TESTING_SIZE+1):
   newPred = label_to_img_unet(gtarr.shape[0], gtarr.shape[1],IMG_PATCH_SIZE, IMG_PATCH_SIZE, gtarr,'test')
   #print(newPred)
   img = Image.fromarray(newPred)
+  #imageid = "/test_%d" % i
+  #image_filename = filename + imageid + imageid + ".png"
+  #orImg = Image.open(image_filename)
   img.save(prediction_test_dir + "patch_gtimg_" + str(i) + ".png")
   y_submit[((608//IMG_PATCH_SIZE)**2)*(i-1):((608//IMG_PATCH_SIZE)**2)*i,:] = labels
+  overlay = make_img_overlay_pixel(orImg, newPred, PIXEL_DEPTH)
+  overlay.save(prediction_test_dir + "overlay_" + str(i) + ".png")
+  
 
 print('y_submit: ', y_submit.shape)
 print('antall vei / antall bakgrunn: ', np.sum(y_submit[:,0]))

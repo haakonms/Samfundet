@@ -170,11 +170,12 @@ def get_pred_and_ysubmit_pixelwise(filename, image_idx, datatype, model, PIXEL_D
 
     #img = mpimg.imread(prediction_test_dir + "gtimg_" + str(i) + ".png")
 
+    #overlay = make_img_overlay_pixel(img, imgpredict, PIXEL_DEPTH)
+    #overlay.save(prediction_test_dir + "overlay_" + str(i) + ".png")
 
 
 
-
-    return imgpredict#,labels
+    return imgpredict,img#, overlay#,labels
 
 def get_prediction_with_overlay_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NEW_DIM_TRAIN,IMG_PATCH_SIZE):
 
@@ -219,3 +220,36 @@ def get_prediction_with_overlay_pixelwise(filename, image_idx, datatype, model, 
     oimg = make_img_overlay_pixel(img, imgpred, PIXEL_DEPTH)
 
     return oimg, imgpred
+
+def get_pred_postprocessed_unet(filename, image_idx, datatype, IMG_PATCH_SIZE):
+
+    i = image_idx
+    # Specify the path of the 
+    if (datatype == 'train'):
+        imageid = "satImage_%.3d" % image_idx
+        image_filename = filename + imageid + ".png"
+    elif (datatype == 'test'):
+        #filename = prediction_test_dir + "predictimg_" + str(i) + ".png"
+        imageid = "patch_gtimg_%d" % i
+        image_filename = filename + imageid + ".png"
+    else:
+        print('Error: Enter test or train')      
+    #print(image_filename)
+    # loads the image in question
+    #img = mpimg.imread(image_filename)
+    img = cv2.imread(image_filename, cv2.IMREAD_GRAYSCALE)
+    #print(img.shape)
+    #rgbimg = cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
+    #print(rgbimg.shape)
+    p_img = post_process(img)
+    #data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
+
+
+    label_patches = img_crop(p_img, IMG_PATCH_SIZE, IMG_PATCH_SIZE)
+    data = np.asarray(label_patches)#([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
+    labels = np.asarray([value_to_class(np.mean(data[i])) for i in range(len(data))])
+    #print("bilde",imgpredict.shape)
+    img_post = Image.fromarray(p_img)
+
+
+    return labels, img_post
