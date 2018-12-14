@@ -12,7 +12,10 @@ import shutil
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 
-def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG):
+def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG, val_img = []):
+
+    all_img = range(1,TRAINING_SIZE+1)
+    train_img = np.setdiff1d(all_img, val_img)
 
     seed = 0
     datagenImg = ImageDataGenerator(
@@ -66,7 +69,7 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
     #ground_truth_datagen = ImageDataGenerator(**data_gen_args)
 
     #moving original pictures to augmentet position
-    for i in range(1, TRAINING_SIZE+1):
+    for i in train_img:
       imageid = "satImage_%.3d" % i
       image_filename = train_data_filename + imageid + ".png"
       gt_filename = train_labels_filename + imageid + ".png"
@@ -76,7 +79,7 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
       shutil.copyfile(image_filename, image_dest)
       shutil.copyfile(gt_filename, gt_dest)
 
-    for i in range(1,TRAINING_SIZE+1):
+    for i in train_img:
       imageid = "satImage_%.3d" % i
       image_filename = train_data_filename + imageid + ".png"
       groundtruth_filename = train_labels_filename + imageid + ".png"
