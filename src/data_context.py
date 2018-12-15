@@ -1,8 +1,8 @@
-#from __future__ import print_function
-#import gzip
-#import os
-#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-#import sys
+from __future__ import print_function
+import gzip
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import sys
 import urllib
 import numpy as np
 import matplotlib
