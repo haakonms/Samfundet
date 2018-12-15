@@ -1,18 +1,11 @@
-#from __future__ import print_function
-#import gzip
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-#import sys
-#import urllib
 import numpy as np
 from PIL import Image
 import matplotlib.image as mpimg
-#from PIL import Image
-#from pathlib import Path
-#import shutil
 from pathlib import Path
 from image_processing import img_crop
-#from helpers import value_to_class
 
 
 def value_to_class(v):
