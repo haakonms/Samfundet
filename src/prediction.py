@@ -1,6 +1,9 @@
 import numpy as np
 from PIL import Image
+<<<<<<< HEAD
 
+=======
+>>>>>>> aef4c85170fc2d803e2c5143208f7bc4ea1f0796
 
 def pred_to_submission_strings(y_test):
     """Reads a single image and outputs the strings that should go into the submission file"""
