@@ -2,7 +2,9 @@ import numpy as np
 
 
 def precision(tp, fp):
-    return tp / (tp + fp)
+	if tp + fp == 0:
+		print("No predicted roads!")
+	return tp / (tp + fp)
 
 
 def recall(tp, fn):
@@ -16,6 +18,7 @@ def accuracy(tp, fp, tn, fn):
 def f1_measure(tp, fp, fn):
     pre = precision(tp, fp)
     rec = recall(tp, fn)
+	 	
     return (2.0 * pre * rec)/(pre + rec)
 
 
@@ -35,6 +38,7 @@ def f1_values(y_train, y_validation_train):
 				fp += 1
 			else:
 				tn += 1
+
 	return tp, tn, fp, fn
 				
 
