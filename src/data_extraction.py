@@ -9,11 +9,6 @@ from image_processing import img_crop
 from image_augmentation import *
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> d86208d14013c9daf0d20b845ad0a93450821ca3
-
 def value_to_class(v):
     foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
     df = np.sum(v)

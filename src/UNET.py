@@ -54,6 +54,7 @@ import tensorflow.python.platform
 import tensorflow as tf
 from scipy import misc, ndimage
 import shutil
+from sklearn.utils import class_weight, shuffle
 
 from mask_to_submission import *
 from helpers import *
@@ -83,7 +84,7 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 
 
 
-from sklearn.utils import class_weight, shuffle
+
 
 
 
