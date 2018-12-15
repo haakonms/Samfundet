@@ -36,15 +36,6 @@ def label_to_img_unet(imgwidth, imgheight, w, h, output_prediction,datatype):
     return predict_img
     
 
-    # Fills image with the predictions for each patch, so we have a int at each position in the (608,608) array
-    ind = 0
-    for i in range(0,imgheight,h):
-        for j in range(0,imgwidth,w):
-            predict_img[j:j+w, i:i+h] = output_prediction[ind]
-            ind += 1
-
-    return predict_img
-
 def make_img_overlay_pixel(img, predicted_img, PIXEL_DEPTH):
     w, h = img.size
     predicted_img = np.asarray(predicted_img)
@@ -118,7 +109,6 @@ def get_pred_and_ysubmit_pixelwise(filename, image_idx, datatype, model, PIXEL_D
     imgpred = Image.fromarray(predict_img_3c)
     imgpredict = imgpred.resize((608,608))
 
-
     return imgpredict, img
 
 def get_prediction_with_overlay_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NEW_DIM_TRAIN,IMG_PATCH_SIZE):
@@ -133,14 +123,11 @@ def get_prediction_with_overlay_pixelwise(filename, image_idx, datatype, model, 
     else:
         print('Error: Enter test or train')
 
-
     img = Image.open(image_filename)
 
     # Returns a matrix with a prediction for each pixel
     output_prediction = get_prediction_pixel(img, model, NEW_DIM_TRAIN) #(1,224,224)
     output_prediction = np.transpose(output_prediction, (1, 2, 0)) #(224,224,1)
-    
-
 
     predict_img_3c = np.zeros((output_prediction.shape[0],output_prediction.shape[1], 3), dtype=np.uint8)
     predict_img8 = np.squeeze(img_float_to_uint8(output_prediction, PIXEL_DEPTH))
@@ -171,11 +158,9 @@ def get_pred_postprocessed_unet(filename, image_idx, datatype, IMG_PATCH_SIZE):
     img = cv2.imread(image_filename, cv2.IMREAD_GRAYSCALE)
     p_img = post_process(img)
 
-
     label_patches = img_crop(p_img, IMG_PATCH_SIZE, IMG_PATCH_SIZE)
     data = np.asarray(label_patches)
     labels = np.asarray([value_to_class(np.mean(data[i])) for i in range(len(data))])
     img_post = Image.fromarray(p_img)
-
 
     return labels, img_post

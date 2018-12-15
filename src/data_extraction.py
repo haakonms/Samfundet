@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 10564f3c2a63b5ae449bff1e56b3f101a48567fc
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
@@ -10,12 +6,9 @@ from PIL import Image
 import matplotlib.image as mpimg
 from pathlib import Path
 from image_processing import img_crop
-<<<<<<< HEAD
 from image_augmentation import *
 
 
-=======
->>>>>>> 10564f3c2a63b5ae449bff1e56b3f101a48567fc
 
 
 def value_to_class(v):
@@ -159,7 +152,7 @@ def extract_aug_data_and_labels_pixelwise(filename):
     imgs = []
     gt_imgs = []
     pathlist = Path(filename).glob('**/*.png')
-    #goes through all the augmented images in image directory
+    # goes through all the augmented images in image directory
     # must pair them with all the augmented groundtruth images
     for path in pathlist:
         # because path is object not string

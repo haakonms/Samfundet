@@ -30,8 +30,6 @@ def img_crop_context(im, w, h, w_context):
     list_patches = []
     imgwidth = im.shape[0]
     imgheight = im.shape[1]
-    #print('IMGWIDTH: ', imgwidth)
-    #print('IMGHEIGHT: ',  imgheight)
     is_2d = len(im.shape) < 3
     
     # creates the image with reflected edges
@@ -79,13 +77,6 @@ def extract_data_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE, dat
     all_img = range(1,num_images+1)
     train_img = numpy.setdiff1d(all_img, val_img)
 
-    # print(val_img)
-    # print(train_img)
-    # print(val_img.shape)
-    # print(train_img.shape)
-
-
-    #for i in range(1, num_images+1):
     for i in train_img:
         if datatype == 'train':
             imageid = "satImage_%.3d" % i
@@ -126,7 +117,6 @@ def extract_data_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE, dat
     # i = antall bilder, j = hvilken patch
     train_data = [train_img_patches[i][j] for i in range(len(train_img_patches)) for j in range(len(train_img_patches[i]))]
     val_data = [val_img_patches[i][j] for i in range(len(val_img_patches)) for j in range(len(val_img_patches[i]))]
-    #print("data",data.shape)
     #shape of returned = (width_image/num_patches * height_image/num_patches*num_images), patch_size, patch_size, 3
     return numpy.asarray(train_data), numpy.asarray(val_data)
 
