@@ -1,4 +1,4 @@
-from __future__ import print_function
+'''from __future__ import print_function
 import gzip
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -6,34 +6,18 @@ import glob
 import shutil
 import sys
 import urllib
+import numpy as np
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from PIL import Image
-from mask_to_submission import *
-from helpers import *
-from F1_metrics import *
-#from Unet import *
-from unetModel import *
-from image_processing import *
-from image_augmentation import *
-from F1_metrics import *
-#from data_context import *
-from data_extraction import *
-from prediction import *
-#from keras_pred import *
-from unet_pred import *
 
-import code
 import tensorflow.python.platform
-
-import numpy as np
-
 import tensorflow as tf
 from scipy import misc, ndimage
 import shutil
 
+
 import keras
-#from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from keras.utils import np_utils
@@ -44,6 +28,63 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 
 from pathlib import Path
 from sklearn.utils import class_weight
+from mask_to_submission import *
+from helpers import *
+from F1_metrics import *
+from unetModel import *
+from image_processing import *
+from image_augmentation import *
+from data_extraction import *
+from prediction import *
+from unet_pred import *'''
+from __future__ import print_function
+import gzip
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import glob
+import shutil
+import sys
+import urllib
+import numpy as np
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+from PIL import Image
+from pathlib import Path
+import tensorflow.python.platform
+import tensorflow as tf
+from scipy import misc, ndimage
+import shutil
+
+from mask_to_submission import *
+from helpers import *
+#from F1_metrics import *
+#from Unet import *
+from image_processing import *
+from image_augmentation import *
+from F1_metrics import *
+#from data_context import *
+from data_extraction import *
+from prediction import *
+#from keras_pred import *
+from unet_pred import *
+from unetModel import *
+
+#import code
+
+
+import keras
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
+from keras.utils import np_utils
+from keras import backend as K
+from keras import optimizers
+from keras.callbacks import EarlyStopping,ModelCheckpoint
+from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
+
+
+
+from sklearn.utils import class_weight, shuffle
+
 
 
 NUM_CHANNELS = 3 # RGB images
@@ -79,8 +120,6 @@ groundTruthDir = data_dir + 'training/augmented/groundtruth'
 
 
 # Loading the data, and set wheter it is to be augmented or not
-
-
 x_train, y_train, x_test, x_val, y_val = load_data_unet(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE,VALIDATION_SIZE, NEW_DIM_TRAIN,
   saltpepper = 0.05, augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir,newaugment=True)
 
@@ -91,8 +130,7 @@ print(x_train.shape)
 
 img_rows = x_train[0].shape[1]
 img_cols = img_rows
-print(img_rows)
-#input_shape = (NUM_CHANNELS, img_rows, img_cols) 
+print(img_rows) 
 yweight = y_train[:,:,:,0]
 yweight = yweight.flatten()
 print(np.unique(yweight), sum(yweight))
