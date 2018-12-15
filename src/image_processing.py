@@ -42,12 +42,15 @@ def post_process(img):
     kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT,(1,33))
     kernel3 = cv2.getStructuringElement(cv2.MORPH_RECT,(17,1))
     kernel4 = cv2.getStructuringElement(cv2.MORPH_RECT,(1,17))
+
     img1 = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel1)
     img2 = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel2)
 
     img_open = cv2.bitwise_or(img1, img2)
+
     img3 = cv2.morphologyEx(img_open, cv2.MORPH_CLOSE, kernel3)
     img4 = cv2.morphologyEx(img_open, cv2.MORPH_CLOSE, kernel4)
+    
     img_close = cv2.bitwise_or(img3, img4)
     
     return img_close

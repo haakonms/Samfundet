@@ -111,29 +111,25 @@ model.fit(x_train, y_train,
           )
 
 
-prediction_test_dir = "predictions_test/"
+list_filename = []
+prediction_test_dir = data_dir + "predictions_test/"
+
+
 if not os.path.isdir(prediction_test_dir):
     os.mkdir(prediction_test_dir)
-y_submit = np.zeros((((608//IMG_PATCH_SIZE)**2)*TESTING_SIZE,2))
+
 for i in range(1,TESTING_SIZE+1):
-  gtimg, orImg = get_pred_and_ysubmit_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN,IMG_PATCH_SIZE,prediction_test_dir)
-  gtimg.save(prediction_test_dir + "gtimg_" + str(i) + ".png")
-  gtarr = np.asarray(gtimg)
-  label_patches = img_crop(gtarr, IMG_PATCH_SIZE, IMG_PATCH_SIZE)
-  data = np.asarray(label_patches)
-  labels = np.asarray([value_to_class(np.mean(data[i])) for i in range(len(data))])
-  newPred = label_to_img_unet(gtarr.shape[0], gtarr.shape[1],IMG_PATCH_SIZE, IMG_PATCH_SIZE, gtarr,'test')
-  img = Image.fromarray(newPred)
-  img.save(prediction_test_dir + "patch_gtimg_" + str(i) + ".png")
-  y_submit[((608//IMG_PATCH_SIZE)**2)*(i-1):((608//IMG_PATCH_SIZE)**2)*i,:] = labels
-  overlay = make_img_overlay_pixel(orImg, img, PIXEL_DEPTH)
-  overlay.save(prediction_test_dir + "overlay_" + str(i) + ".png")
+  gt_pred, orImg = get_pred_img_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, NEW_DIM_TRAIN,prediction_test_dir)
+  gt_filename = prediction_test_dir + "gt_pred_" + str(i) + ".png"
+  list_filename.append(gt_filename)
+  gt_pred.save(gt_filename)
+  overlay2 = make_img_overlay_pixel(orImg, gt_pred, PIXEL_DEPTH)
+  overlay2.save(prediction_test_dir + "overlay_" + str(i) + ".png")
   
+masks_to_submission("kerasMask.csv", *list_filename)
 
-print('y_submit: ', y_submit.shape)
-print('antall vei / antall bakgrunn: ', np.sum(y_submit[:,0]))
+prediction_training_dir = data_dir + "predictions_training/"
 
-prediction_training_dir = "predictions_training/"
 if not os.path.isdir(prediction_training_dir):
     os.mkdir(prediction_training_dir)
 for i in range(1, TRAINING_SIZE+1):
@@ -141,10 +137,25 @@ for i in range(1, TRAINING_SIZE+1):
     oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png")
     imgpred.save(prediction_training_dir + "predictimg_" + str(i) + ".png")
 
-  
+new_test_filename = data_dir + 'test_set_post_images/'
+post_processed_list = []
+if not os.path.isdir(new_test_filename):
+    os.mkdir(new_test_filename)
 
-# Make submission file
-prediction_to_submission2('submission_keras.csv', y_submit)
 
+
+for i in range(1,TESTING_SIZE+1):
+    p_img = get_postprocessed_unet(prediction_test_dir, i, 'test')
+    filename = new_test_filename + "processedimg_" + str(i) + ".png"
+    post_processed_list.append(filename)
+    p_img.save(filename)
+    pred = Image.open(filename)
+    pred = pred.convert('RGB')
+    imageid = "/test_%d" % i
+    image_filename = test_data_filename + imageid + imageid + ".png"
+    overlay = make_img_overlay_pixel(orImg, pred, PIXEL_DEPTH)
+    overlay.save(new_test_filename + "overlay_" + str(i) + ".png")
+
+masks_to_submission("kerasPostprocessedMask.csv", *post_processed_list)
 
 

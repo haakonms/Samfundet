@@ -15,7 +15,7 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
             rotation_range=90, #in radians
             zoom_range=0.4,
             fill_mode= 'reflect',
-            brightness_range=(0,2),
+            #brightness_range=(0,2),
             vertical_flip=True,
             horizontal_flip=True
             )
@@ -23,7 +23,7 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
             rotation_range=90, #in radians
             zoom_range=0.4,
             fill_mode= 'reflect',
-            brightness_range=(0,2),
+            #brightness_range=(0,2),
             vertical_flip=True,
             horizontal_flip=True
             )
@@ -48,7 +48,8 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
       gt_dest = groundTruthDir + "/" + imageid + ".png"
       shutil.copyfile(image_filename, image_dest)
       shutil.copyfile(gt_filename, gt_dest)
-
+      
+    # augmenting images
     for i in train_img:
       imageid = "satImage_%.3d" % i
       image_filename = train_data_filename + imageid + ".png"
