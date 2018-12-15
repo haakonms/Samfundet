@@ -1,24 +1,10 @@
-import numpy as np 
-import os
-import skimage.io as io
-import skimage.transform as trans
-import numpy as np
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from keras import backend as keras
-from data_extraction import *
-from pathlib import Path
-
-
 from keras.utils.data_utils import get_file
 
-
-
-NEW_DIM_TRAIN = 400
-INPUT_CHANNELS = 3
-IMAGE_ORDERING = 'channels_first'
 
 def conv2d_block(input_tensor, n_filters, kernel_size=3, batchnorm=True):
     # first layer

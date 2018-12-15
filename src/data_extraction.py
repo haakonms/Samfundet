@@ -3,7 +3,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
 import random
 from PIL import Image
-import matplotlib.image as mpimg
 from pathlib import Path
 from image_processing import img_crop
 from image_augmentation import *
@@ -32,7 +31,7 @@ def load_data_unet(train_data_filename, train_labels_filename, test_data_filenam
         print('Augmenting training images...')
         if newaugment == True:
             augmentation(data_dir, augImgDir, groundTruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG,idx)
-        x_train, y_train = extract_aug_data_and_labels_pixelwise(augImgDir)#, TRAINING_SIZE*(MAX_AUG+1))
+        x_train, y_train = extract_aug_data_and_labels_pixelwise(augImgDir)
         _, x_val = extract_data_pixelwise(train_data_filename,TRAINING_SIZE, 'train', new_dim_train,idx)
         _, y_val = extract_labels_pixelwise(train_labels_filename,TRAINING_SIZE, new_dim_train,idx)
 
