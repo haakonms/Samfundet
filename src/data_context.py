@@ -1,10 +1,10 @@
-from __future__ import print_function
-import gzip
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-import sys
+#from __future__ import print_function
+#import gzip
+#import os
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+#import sys
 import urllib
-import numpy
+import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.image as mpimg
@@ -57,10 +57,10 @@ def img_crop_context(im, w, h, w_context):
 def value_to_class_context(patch, IMG_PATCH_SIZE, CONTEXT_SIZE):
     
     patch_center = patch[CONTEXT_SIZE:CONTEXT_SIZE+IMG_PATCH_SIZE,CONTEXT_SIZE:CONTEXT_SIZE+IMG_PATCH_SIZE]
-    v = numpy.mean(patch)
+    v = np.mean(patch)
 
     foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
-    df = numpy.sum(v)
+    df = np.sum(v)
     if df > foreground_threshold:
         return [0, 1]
     else:
@@ -77,7 +77,7 @@ def extract_data_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE, dat
     t_imgs = []
     v_imgs = []
     all_img = range(1,num_images+1)
-    train_img = numpy.setdiff1d(all_img, val_img)
+    train_img = np.setdiff1d(all_img, val_img)
 
     # print(val_img)
     # print(train_img)
@@ -128,7 +128,7 @@ def extract_data_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE, dat
     val_data = [val_img_patches[i][j] for i in range(len(val_img_patches)) for j in range(len(val_img_patches[i]))]
     #print("data",data.shape)
     #shape of returned = (width_image/num_patches * height_image/num_patches*num_images), patch_size, patch_size, 3
-    return numpy.asarray(train_data), numpy.asarray(val_data)
+    return np.asarray(train_data), np.asarray(val_data)
 
 
 
@@ -167,10 +167,10 @@ def extract_aug_data_and_labels_context(filename, num_images, IMG_PATCH_SIZE, CO
     # i = antall bilder, j = hvilken patch
     data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
     gt_patches = [img_crop(gt_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
-    data_gt = numpy.asarray([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
-    labels = numpy.asarray([value_to_class(numpy.mean(data_gt[i])) for i in range(len(data_gt))])
+    data_gt = np.asarray([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
+    labels = np.asarray([value_to_class(np.mean(data_gt[i])) for i in range(len(data_gt))])
 
-    return numpy.asarray(data), labels.astype(numpy.float32)
+    return np.asarray(data), labels.astype(np.float32)
 
 # Extract label images
 def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, val_img=[]):
@@ -179,7 +179,7 @@ def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, val_img=[]):
     t_imgs = []
     v_imgs = []
     all_img = range(1,num_images+1)
-    train_img = numpy.setdiff1d(all_img, val_img)
+    train_img = np.setdiff1d(all_img, val_img)
 
 
     for i in train_img:
@@ -212,8 +212,8 @@ def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, val_img=[]):
     v_data = np.asarray([v_patches[i][j] for i in range(len(v_patches)) for j in range(len(v_patches[i]))])
     
 
-    t_labels = numpy.asarray([value_to_class(np.mean(t_data[i])) for i in range(len(t_data))])
-    v_labels = numpy.asarray([value_to_class(np.mean(v_data[i])) for i in range(len(v_data))])
+    t_labels = np.asarray([value_to_class(np.mean(t_data[i])) for i in range(len(t_data))])
+    v_labels = np.asarray([value_to_class(np.mean(v_data[i])) for i in range(len(v_data))])
 
     # Convert to dense 1-hot representation.
     return t_labels.astype(np.float32), v_labels.astype(np.float32)
@@ -233,7 +233,7 @@ def load_data_context(train_data_filename, train_labels_filename, test_data_file
         print('\nLoading training images')
         x_train, x_val = extract_data_context(train_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE,  'train', idx)
         #print(x_train[:10])
-        #x_train = numpy.asarray(x_train)
+        #x_train = np.asarray(x_train)
 
         print('Loading training labels')
         y_train, y_val = extract_labels_context(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE, idx)
@@ -259,7 +259,7 @@ def load_data_context(train_data_filename, train_labels_filename, test_data_file
     print('Val data shape: ',x_val.shape)
     print('Val labels shape: ',y_val.shape)
 
-    [cl1,cl2] = numpy.sum(y_train, axis = 0, dtype = int)
+    [cl1,cl2] = np.sum(y_train, axis = 0, dtype = int)
     print('Number of samples in class 1 (background): ',cl1)
     print('Number of samples in class 2 (road): ',cl2, '\n')
 
@@ -277,7 +277,7 @@ def load_data_context(train_data_filename, train_labels_filename, test_data_file
 def get_prediction_context(img, model, IMG_PATCH_SIZE, CONTEXT_SIZE):
     
     # Turns the image into its data patches
-    data = numpy.asarray(img_crop_context(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE))
+    data = np.asarray(img_crop_context(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE))
     #shape ((38*38), 16,16,3)
 
     # Data now is a vector of the patches from one single image in the testing data
@@ -334,7 +334,7 @@ def get_predictionimage_context(filename, image_idx, datatype, model, IMG_PATCH_
 
     
     # Changes into a 3D array, to easier turn into image
-    predict_img_3c = numpy.zeros((img.shape[0],img.shape[1], 3), dtype=numpy.uint8)
+    predict_img_3c = np.zeros((img.shape[0],img.shape[1], 3), dtype=np.uint8)
     predict_img8 = img_float_to_uint8(predict_img, PIXEL_DEPTH)          
     predict_img_3c[:,:,0] = predict_img8
     predict_img_3c[:,:,1] = predict_img8

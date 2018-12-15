@@ -1,4 +1,3 @@
-
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
@@ -83,6 +82,7 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
         j +=1
         if j>=MAX_AUG:
           break
+
 
 def sp_noise(images, s_vs_p = 0.5, amount = 0.004):
 
