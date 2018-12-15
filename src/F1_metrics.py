@@ -18,6 +18,7 @@ def f1_measure(tp, fp, fn):
     rec = recall(tp, fn)
     return (2.0 * pre * rec)/(pre + rec)
 
+
 def f1_values(y_train, y_validation_train):
 	tp = 0
 	fp = 0

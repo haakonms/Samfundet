@@ -15,11 +15,11 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 
 #from helpers import augmentation, make_img_overlay, label_to_img, img_float_to_uint8, extract_labels, img_crop, value_to_class
 
-from keras_pred import make_img_overlay, label_to_img
-from image_processing import img_float_to_uint8, img_crop
+
+from image_processing import *
 from image_augmentation import *
 from data_extraction import *
-from helpers import value_to_class
+from helpers import *
 
 import cv2 as cv2
 import random

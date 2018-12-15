@@ -1,9 +1,4 @@
 from __future__ import print_function
-
-#import matplotlib
-#matplotlib.use('Agg')
-
-
 import gzip
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -12,8 +7,6 @@ import shutil
 import sys
 import urllib
 
-#import matplotlib.image as mpimg
-#import matplotlib.pyplot as plt
 from PIL import Image
 from mask_to_submission import *
 from helpers import *
@@ -23,9 +16,7 @@ from F1_metrics import *
 from data_context import *
 from data_extraction import *
 from prediction import *
-from keras_pred import *
 from unet_pred import *
-#from justtesting import *
 
 import code
 import tensorflow.python.platform
@@ -37,14 +28,12 @@ from scipy import misc, ndimage
 import shutil
 
 import keras
-#from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from keras.utils import np_utils
 from keras.callbacks import ModelCheckpoint, Callback
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
-
 
 from pathlib import Path
 from sklearn.utils import class_weight, shuffle
@@ -112,61 +101,27 @@ x_train, y_train, x_test, x_val, y_val = load_data_context(train_data_filename, 
 class_weights = (1,3)
 print('Class weights: ',class_weights) 
 
-# input image dimensions
-#img_rows, img_cols = BATCH_SIZE, BATCH_SIZE
+
 img_rows = x_train[0].shape[1]
 img_cols = img_rows
-#print(img_rows)
+
 input_shape = (img_rows, img_cols, NUM_CHANNELS) 
 
 ordering = 'channels_last'
 
 model = Sequential()
-'''
-model.add(Conv2D(32, kernel_size=(3, 3), activation='relu',input_shape=input_shape, padding="same", data_format=ordering)) #32 is number of outputs from that layer, kernel_size is filter size, 
-model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding="same", data_format=ordering))
-#model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding="same", data_format=ordering))
-model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
-model.add(Dropout(0.25))
 
-model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
-model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
-#model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
-model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
-model.add(Dropout(0.25))
-
-model.add(Conv2D(128, (2, 2), activation='relu', padding="same", data_format=ordering))
-model.add(Conv2D(128, (2, 2), activation='relu', padding="same", data_format=ordering))
-model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
-model.add(Dropout(0.25))
-
-model.add(Flatten())
-model.add(Dense(1024, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(NUM_LABELS, activation='softmax'))'''
-
-model.add(Conv2D(64, kernel_size=(3, 3), activation='relu',input_shape=input_shape, padding="same", data_format=ordering)) #32 is number of outputs from that layer, kernel_size is filter size, 
-#model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding="same", data_format=ordering))
-#model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', padding="same", data_format=ordering))
+model.add(Conv2D(64, kernel_size=(3, 3), activation='relu',input_shape=input_shape, padding="same", data_format=ordering))
 model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
 model.add(Dropout(0.25))
 
 model.add(Conv2D(128, (3, 3), activation='relu', padding="same", data_format=ordering))
-#model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
-#model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
 model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
 model.add(Dropout(0.25))
 
 model.add(Conv2D(256, (3, 3), activation='relu', padding="same", data_format=ordering))
-#model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
-#model.add(Conv2D(64, (3, 3), activation='relu', padding="same", data_format=ordering))
 model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
 model.add(Dropout(0.25))
-
-#model.add(Conv2D(128, (2, 2), activation='relu', padding="same", data_format=ordering))
-#model.add(Conv2D(128, (2, 2), activation='relu', padding="same", data_format=ordering))
-#model.add(MaxPooling2D(pool_size=(2, 2), padding="same", data_format=ordering))
-#model.add(Dropout(0.25))
 
 model.add(Flatten())
 model.add(Dense(256, activation='relu'))

@@ -38,8 +38,8 @@ def concatenate_images(img, gt_img):
     return cimg
 
 def post_process(img):
-    kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT,(1,17))
-    kernel1 = cv2.getStructuringElement(cv2.MORPH_RECT,(17,1))
+    kernel1 = cv2.getStructuringElement(cv2.MORPH_RECT,(33,1))
+    kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT,(1,33))
     kernel3 = cv2.getStructuringElement(cv2.MORPH_RECT,(17,1))
     kernel4 = cv2.getStructuringElement(cv2.MORPH_RECT,(1,17))
     img1 = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel1)
