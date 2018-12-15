@@ -55,14 +55,15 @@ def conv2d_block(input_tensor, n_filters, kernel_size=3, batchnorm=True):
                padding="same")(input_tensor)
     if batchnorm:
         x = BatchNormalization()(x)
-    x = Activation("relu")(x)
-    
+    #x = Activation("relu")(x)
+    x = LeakyReLU(0.1)(x)
     # second layer
     x = Conv2D(filters=n_filters, kernel_size=(kernel_size, kernel_size), kernel_initializer="he_normal",
                padding="same")(x)
     if batchnorm:
         x = BatchNormalization()(x)
-    x = Activation("relu")(x)
+    #x = Activation("relu")(x)
+    x = LeakyReLU(0.1)(x)
     return x
 
 
@@ -107,12 +108,6 @@ def create_model(input_img, n_filters=16, dropout=0.5, batchnorm=True):
     u9 = Dropout(dropout)(u9)
     c9 = conv2d_block(u9, n_filters=n_filters*1, kernel_size=3, batchnorm=batchnorm)
     
-    ################################
-    # Changed from outputs = Conv2D(1, (1, 1), activation='sigmoid') (c9) to see if the channels where the problem 
-    # That fuckes up the predictions
-    # May need to change to outputs = Conv2D(None, (1, 1), activation='sigmoid') (c9) as both PILLOW and matplot lib
-    # don't use a number to represent the channels for black and white Imanges... But this wouldn't compile the model
-    ##################################
     outputs = Conv2D(2, (1, 1), activation='sigmoid') (c9)
     
     model = Model(inputs=input_img, outputs=outputs)
