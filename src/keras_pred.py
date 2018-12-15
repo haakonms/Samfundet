@@ -172,25 +172,12 @@ def get_pred_postprocessed(filename, image_idx, datatype, IMG_PATCH_SIZE):
     # loads the image in question
     #img = mpimg.imread(image_filename)
     img = cv2.imread(image_filename, cv2.IMREAD_GRAYSCALE)
-    #print(img.shape)
-    #rgbimg = cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
-    #print(rgbimg.shape)
     p_img = post_process(img)
     #data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
 
-
     label_patches = img_crop(p_img, IMG_PATCH_SIZE, IMG_PATCH_SIZE)
-    data = np.asarray(label_patches)#([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
+    data = np.asarray(label_patches)
     labels = np.asarray([value_to_class(np.mean(data[i])) for i in range(len(data))])
-    #print("bilde",imgpredict.shape)
     img_post = Image.fromarray(p_img)
-    '''imgpredarr = np.asarray(imgpredict)
-    imgpredarr = np.transpose(imgpredarr, (0, 3, 1, 2))
-    print("array", imgpredarr.shape)
-    labels = np.zeros((1,608,608,2))
-
-    foreground_threshold = 0.5
-    labels[imgpredarr > foreground_threshold] = [1,0]
-    labels[imgpredarr <= foreground_threshold] = [0,1]'''
 
     return labels, img_post

@@ -17,14 +17,6 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 
 
 
-
-
-
-
-
-
-
-
 def load_data(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, IMG_PATCH_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir=''):
 
     if augment == False:

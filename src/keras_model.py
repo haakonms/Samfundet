@@ -55,7 +55,7 @@ from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_
 NUM_CHANNELS = 3 # RGB images
 PIXEL_DEPTH = 255
 NUM_LABELS = 2
-TRAINING_SIZE = 100
+TRAINING_SIZE = 10
 TESTING_SIZE = 50
 VALIDATION_SIZE = 10  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
@@ -87,7 +87,7 @@ groundTruthDir = data_dir + 'training/augmented/groundtruth'
 # Loading the data, and set wheter it is to be augmented or not
 
 x_train, y_train, x_test, x_val, y_val = load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, VALIDATION_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE,
-          saltpepper = 0.05, augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir, newaugment=True) # The last 3 parameters can be blank when we dont want augmentation
+          saltpepper = 0.00, augment=False, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir, newaugment=True) # The last 3 parameters can be blank when we dont want augmentation
 
 #(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, VALIDATION_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir='', newaugment=True)
 
@@ -174,10 +174,10 @@ model.add(Dropout(0.5))
 model.add(Dense(NUM_LABELS, activation='softmax'))
 
 model.summary()
+'''
 
 
-
-use_model = True
+use_model = False
 model_filename = 'weights/weights.best.drive.hdf5'
 
 if use_model == True:
@@ -187,11 +187,12 @@ if use_model == True:
 #model.load_weights(model_filename)
 
 #model.load_weights(model_filename)
+'''
 model.compile(loss=keras.losses.categorical_crossentropy,
           optimizer=keras.optimizers.Adam(),
           metrics=['accuracy'])
 
-
+'''
 
 if use_model == False:
 
@@ -247,33 +248,27 @@ if use_model == False:
     metrics = Metrics()
 
 
-
+'''
     # Checkpoint
-    filepath="weights/weights.best.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-    callbacks_list = [metrics,checkpoint]
+    #filepath="weights/weights.best.hdf5"
+    #checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    #callbacks_list = [metrics,checkpoint]
 
 
     # Train the model
-    print("X", x_train.shape, "y", y_train.shape)
+    #print("X", x_train.shape, "y", y_train.shape)
     #print(y_train[:10]) # kolonne 0 sier om den er foreground eller ikke, kolonne 1 sier om den er road eller ikke
     # Altså når man lager weights med den første kolonnen, vil man få klasse 1 = road og klasse 0 = background
-    model.fit(x_train, y_train,
-              validation_data=(x_val, y_val),
-              batch_size=BATCH_SIZE,
-              epochs=NUM_EPOCHS,
-              shuffle = True,
-              verbose=1,
-              #validation_split = 0.1,
-              class_weight = class_weights,
-              callbacks = callbacks_list)
-              #validation_data=(x_test, y_test))
-    #score = model.evaluate(x_test, y_test, verbose=0)
-    #print('Test loss:', score[0])
-    #print('Test accuracy:', score[1])
-    '''model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
-                        steps_per_epoch=25000, epochs=NUM_EPOCHS, verbose=1)'''
-
+model.fit(x_train, y_train,
+    validation_data=(x_val, y_val),
+    batch_size=BATCH_SIZE,
+    epochs=NUM_EPOCHS,
+    shuffle = True,
+    verbose=1,
+    #validation_split = 0.1,
+    class_weight = class_weights,
+    #callbacks = callbacks_list)
+    )
 
 # Make submission file
 y_submit = model.predict_classes(x_test)
@@ -284,7 +279,7 @@ y_train_val = model.predict_classes(x_train)
 tp, tn, fp, fn = f1_values(y_train, y_train_val)
 f1 = f1_measure(tp, fp, fn)
 print("f1", f1)
-'''
+
 
 #y_testelitt = model.predict_classes(x_train)
 
@@ -308,6 +303,7 @@ for i in range(1, TRAINING_SIZE+1):
     imgpred.save(prediction_training_dir + "predictimg_" + str(i) + ".png")
 
 '''
+
 #image_filenames=[]
 prediction_test_dir = "predictions_test/"
 if not os.path.isdir(prediction_test_dir):
@@ -344,8 +340,5 @@ prediction_to_submission2('submission_keras_test.csv', y_submit_post)
 
 
 
-
-
-
-
+'''
 

@@ -1,5 +1,3 @@
-
-
 from __future__ import print_function
 import gzip
 import os
@@ -20,7 +18,7 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 from keras_pred import make_img_overlay, label_to_img
 from image_processing import img_float_to_uint8, img_crop
 from image_augmentation import *
-from data_extraction import extract_labels
+from data_extraction import *
 from helpers import value_to_class
 
 import cv2 as cv2
@@ -217,8 +215,6 @@ def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, val_img=[]):
     t_labels = numpy.asarray([value_to_class(np.mean(t_data[i])) for i in range(len(t_data))])
     v_labels = numpy.asarray([value_to_class(np.mean(v_data[i])) for i in range(len(v_data))])
 
-    #t_labels = [sp_noise_img(t_labels[i]) for i in range(len(t_data))]
-
     # Convert to dense 1-hot representation.
     return t_labels.astype(np.float32), v_labels.astype(np.float32)
 
@@ -271,9 +267,6 @@ def sp_noise(images, s_vs_p = 0.5, amount = 0.004):
             #         out[w,h,:] = [0,0,0]
 
             outs[j,:,:,:] = out
-        
-    
-
         return outs
 
 
@@ -295,9 +288,6 @@ def load_data_context(train_data_filename, train_labels_filename, test_data_file
         print('Loading training labels')
         y_train, y_val = extract_labels_context(train_labels_filename, TRAINING_SIZE, IMG_PATCH_SIZE, idx)
 
-        
-
-        #print(y_train[:20])
     elif augment == True:
         print('Augmenting traing images...')
         if newaugment == True:
@@ -347,20 +337,6 @@ def get_prediction_context(img, model, IMG_PATCH_SIZE, CONTEXT_SIZE):
     return output_prediction
 
 
-'''def label_to_img_context(imgwidth, imgheight, w, h, output_prediction):
-
-    # Defines the "black white" image that is to be saved
-    predict_img = numpy.zeros([imgwidth, imgheight])
-
-    # Fills image with the predictions for each patch, so we have a int at each position in the (608,608) array
-    ind = 0
-    for i in range(0,imgheight,h):
-        for j in range(0,imgwidth,w):
-            predict_img[j:j+w, i:i+h] = output_prediction[ind]
-            ind += 1
-
-    return predict_img'''
-
 # Get prediction overlaid on the original image for given input file
 def get_prediction_with_overlay_context(filename, image_idx, datatype, model, IMG_PATCH_SIZE, CONTEXT_SIZE, PIXEL_DEPTH):
 
@@ -382,10 +358,7 @@ def get_prediction_with_overlay_context(filename, image_idx, datatype, model, IM
     
     # Returns a representation of the image as a 2D vector with a label at each pixel
     img_prediction = label_to_img(img.shape[0],img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
-    
-
     oimg = make_img_overlay(img, img_prediction, PIXEL_DEPTH)
-
     return oimg
 
 
