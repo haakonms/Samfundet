@@ -55,12 +55,12 @@ from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_
 NUM_CHANNELS = 3 # RGB images
 PIXEL_DEPTH = 255
 NUM_LABELS = 2
-TRAINING_SIZE = 10
+TRAINING_SIZE = 5
 TESTING_SIZE = 50
 VALIDATION_SIZE = 10  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16 # 64
-NUM_EPOCHS = 10
+NUM_EPOCHS = 1
 RESTORE_MODEL = False # If True, restore existing model instead of training a new one
 RECORDING_STEP = 1000
 MAX_AUG = 1

@@ -82,7 +82,7 @@ groundTruthDir = data_dir + 'training/augmented/groundtruth'
 
 
 x_train, y_train, x_test, x_val, y_val = load_data_unet(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE,VALIDATION_SIZE, NEW_DIM_TRAIN,
-  saltpepper = 0.05, augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir)
+  saltpepper = 0.05, augment=True, MAX_AUG=MAX_AUG, augImgDir=imgDir , data_dir=data_dir, groundTruthDir =groundTruthDir,newaugment=True)
 
 
 print(y_train.shape)

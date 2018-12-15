@@ -1,18 +1,14 @@
-#from __future__ import print_function
-#import gzip
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-#import sys
-#import urllib
 import numpy as np
+import random
 from PIL import Image
 import matplotlib.image as mpimg
-#from PIL import Image
-#from pathlib import Path
-#import shutil
 from pathlib import Path
 from image_processing import img_crop
-#from helpers import value_to_class
+from image_augmentation import *
+
+
 
 
 def value_to_class(v):
@@ -23,7 +19,35 @@ def value_to_class(v):
     else:
         return [1, 0]
 
+def load_data_unet(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE,VALIDATION_SIZE, 
+    new_dim_train,saltpepper = 0.004,augment=False,MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir='',newaugment=True):
+    
+    idx = random.sample(range(1, 100), VALIDATION_SIZE)
+    if augment == False:
+        print('No augmenting of training images')
+        print('\nLoading training images')
+        x_train, x_val = extract_data_pixelwise(train_data_filename,TRAINING_SIZE,  'train', new_dim_train,idx)
+        print('Train data shape: ',x_train.shape)
+        y_train, y_val = extract_labels_pixelwise(train_labels_filename,TRAINING_SIZE, new_dim_train,idx)
+        print('Train labels shape: ',y_train.shape)
+    elif augment == True:
+        print('Augmenting training images...')
+        if newaugment == True:
+            augmentation(data_dir, augImgDir, groundTruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG,idx)
+        x_train, y_train = extract_aug_data_and_labels_pixelwise(augImgDir)#, TRAINING_SIZE*(MAX_AUG+1))
+        _, x_val = extract_data_pixelwise(train_data_filename,TRAINING_SIZE, 'train', new_dim_train,idx)
+        _, y_val = extract_labels_pixelwise(train_labels_filename,TRAINING_SIZE, new_dim_train,idx)
 
+    x_train = sp_noise(x_train, amount=saltpepper)
+    x_test,_ = extract_data_pixelwise(test_data_filename,TESTING_SIZE,  'test', new_dim_train)
+    print('Test data shape: ',x_test.shape)
+    road = np.sum(y_train[:,:,:,1], dtype = int)
+    background = np.sum(y_train[:,:,:,0], dtype = int)
+    print('Number of samples in class 1 (background): ',road)
+    print('Number of samples in class 2 (road): ',background, '\n')
+
+
+    return x_train, y_train, x_test, x_val, y_val
 
 
 def extract_data_pixelwise(filename,num_images, datatype, new_dim_train,val_img=[]):
@@ -57,7 +81,6 @@ def extract_data_pixelwise(filename,num_images, datatype, new_dim_train,val_img=
             imageid = "satImage_%.3d" % i
             image_filename = filename + imageid + ".png"
             if os.path.isfile(image_filename):
-                #print ('Loading ' + image_filename)
                 img = Image.open(image_filename)
                 img = np.asarray(img)
                 v_imgs.append(img)
@@ -66,7 +89,6 @@ def extract_data_pixelwise(filename,num_images, datatype, new_dim_train,val_img=
     
     t_arr =np.array(t_imgs)
     v_arr = np.array(v_imgs) 
-    #print("datapixelwise",t_arr.shape,v_arr.shape)
 
     return t_arr,v_arr
 
@@ -88,7 +110,6 @@ def extract_labels_pixelwise(filename, num_images,new_dim_train, val_img=[]):
         if os.path.isfile(image_filename):
             # Add the image to the imgs-array
             img = Image.open(image_filename)
-
             img = np.asarray(img)
             t_imgs.append(img)
         else:
@@ -101,7 +122,6 @@ def extract_labels_pixelwise(filename, num_images,new_dim_train, val_img=[]):
         if os.path.isfile(image_filename):
             # Add the image to the imgs-array
             img = Image.open(image_filename)
-
             img = np.asarray(img)
             v_imgs.append(img)
         else:

@@ -83,3 +83,29 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
         j +=1
         if j>=MAX_AUG:
           break
+
+def sp_noise(images, s_vs_p = 0.5, amount = 0.004):
+
+        n_img,row,col,ch = images.shape
+
+        outs = images
+
+        for j in range(n_img):
+            out = outs[j,:,:,:]
+
+            # Salt mode
+            num_salt = np.ceil(amount * out.size * s_vs_p)
+            w_ind = np.random.randint(0, col-1, int(num_salt))
+            h_ind = np.random.randint(0, row-1, int(num_salt))
+
+            out[h_ind, w_ind, :] = [0,0,0]
+
+            # Pepper mode
+            num_pepper = np.ceil(amount* out.size * (1. - s_vs_p))
+            w_ind = np.random.randint(0, col-1, int(num_pepper))
+            h_ind = np.random.randint(0, row-1, int(num_pepper))
+
+            out[h_ind, w_ind, :] = [1,1,1]
+            outs[j,:,:,:] = out
+            
+        return outs

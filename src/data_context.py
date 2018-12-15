@@ -219,56 +219,6 @@ def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, val_img=[]):
     return t_labels.astype(np.float32), v_labels.astype(np.float32)
 
 
-def sp_noise(images, s_vs_p = 0.5, amount = 0.004):
-        # n_img, row, col, ch = images.shape
-        
-        # out_images = np.zeros((images.shape))
-        # for i in range(n_img):
-
-        #     image = images[i,:,:,:]
-        #     print(np.shape(image))
-        #     out_images[i,:,:,:] = image
-            
-        #     # Add Salt
-        #     num_salt = np.ceil(amount * image.size * s_vs_p)
-        #     idx = [np.random.randint(0, j - 1, int(num_salt)) for j in image.shape[1:2]]
-        #     #print(np.shape(idx))
-        #     out_images[i,idx] = 1
-
-        #     # Add Pepper
-        #     num_pepper = np.ceil(amount* image.size * (1. - s_vs_p))
-        #     coords = [np.random.randint(0, j - 1, int(num_pepper)) for j in image.shape[1:2]]
-        #     out_images[i,coords] = 0
-        
-        # return out_images
-
-        n_img,row,col,ch = images.shape
-
-        outs = images
-
-        for j in range(n_img):
-            out = outs[j,:,:,:]
-
-            # Salt mode
-            num_salt = np.ceil(amount * out.size * s_vs_p)
-            w_ind = np.random.randint(0, col-1, int(num_salt))
-            h_ind = np.random.randint(0, row-1, int(num_salt))
-
-            out[h_ind, w_ind, :] = [0,0,0]
-
-            # Pepper mode
-            num_pepper = np.ceil(amount* out.size * (1. - s_vs_p))
-            w_ind = np.random.randint(0, col-1, int(num_pepper))
-            h_ind = np.random.randint(0, row-1, int(num_pepper))
-
-            out[h_ind, w_ind, :] = [1,1,1]
-            # for w in w_ind:
-            #     for h in h_ind:
-            #         out[w,h,:] = [0,0,0]
-
-            outs[j,:,:,:] = out
-        return outs
-
 
 
 
