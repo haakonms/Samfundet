@@ -9,6 +9,10 @@ from image_processing import img_crop
 from image_augmentation import *
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> d86208d14013c9daf0d20b845ad0a93450821ca3
 
 def value_to_class(v):
     foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
@@ -151,7 +155,7 @@ def extract_aug_data_and_labels_pixelwise(filename):
     imgs = []
     gt_imgs = []
     pathlist = Path(filename).glob('**/*.png')
-    #goes through all the augmented images in image directory
+    # goes through all the augmented images in image directory
     # must pair them with all the augmented groundtruth images
     for path in pathlist:
         # because path is object not string

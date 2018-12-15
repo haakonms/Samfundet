@@ -12,15 +12,15 @@ from PIL import Image
 from mask_to_submission import *
 from helpers import *
 from F1_metrics import *
-from Unet import *
-from nyUnet import *
+#from Unet import *
+from unetModel import *
 from image_processing import *
 from image_augmentation import *
 from F1_metrics import *
 #from data_context import *
 from data_extraction import *
 from prediction import *
-from keras_pred import *
+#from keras_pred import *
 from unet_pred import *
 
 import code
