@@ -1,9 +1,6 @@
 import numpy as np
 from PIL import Image
-<<<<<<< HEAD
 
-=======
->>>>>>> aef4c85170fc2d803e2c5143208f7bc4ea1f0796
 
 def pred_to_submission_strings(y_test):
     """Reads a single image and outputs the strings that should go into the submission file"""
@@ -48,8 +45,6 @@ def prediction_to_submission(filename, y_submit):
 def prediction_to_submission2(filename, y_submit):
     with open(filename, 'w') as f:
         f.write('id,prediction\n')
-        #for i in range(72200):
-        print(y_submit.shape)
         i=0;
         for j in range(1,50+1):
           for k in range(0,593,16):

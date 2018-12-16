@@ -22,7 +22,8 @@ from helpers import *
 
 
 def load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, VALIDATION_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE, saltpepper = 0.004, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir='', newaugment=True):
-    # Takes VALIDATION_SIZE number of random images into the validation set
+
+    # Takes a number equal to VALIDATION_SIZE of random images into the validation set
     idx = random.sample(range(1, 100), VALIDATION_SIZE)
 
     if augment == False:
