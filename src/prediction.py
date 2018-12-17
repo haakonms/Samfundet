@@ -45,8 +45,6 @@ def prediction_to_submission(filename, y_submit):
 def prediction_to_submission2(filename, y_submit):
     with open(filename, 'w') as f:
         f.write('id,prediction\n')
-        #for i in range(72200):
-        print(y_submit.shape)
         i=0;
         for j in range(1,50+1):
           for k in range(0,593,16):
