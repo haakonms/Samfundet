@@ -109,8 +109,8 @@ def get_pred_img_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NE
     # Changes into a 3D array, to easier turn into image
     predict_img_3c = np.zeros((predict_img.shape[0],predict_img.shape[1], 3), dtype=np.uint8)
     predict_img8 = np.squeeze(img_float_to_uint8(predict_img, PIXEL_DEPTH))
-    predict_img8[predict_img8 >= 100] = 255 
-    predict_img8[predict_img8 < 100] = 0        
+    predict_img8[predict_img8 >= 128] = 255 
+    predict_img8[predict_img8 < 128] = 0        
     predict_img_3c[:,:,0] = predict_img8
     predict_img_3c[:,:,1] = predict_img8
     predict_img_3c[:,:,2] = predict_img8
