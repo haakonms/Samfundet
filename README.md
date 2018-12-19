@@ -9,7 +9,7 @@ This is the code written by us for the EPFL Machine Learning course project 2. W
 
 ### Running instructions:
 
-- The code was ran on Python version 3.6.5., with Keras version 2.1.6-tf with TensorFlow backend. In order to install all the packages required for this code, is to run
+- The code was ran on Python version 3.6.5., with Keras version 2.1.6-tf with TensorFlow backend. In order to install all the packages required for this code, run
 
 	```
 	pip3 install -r requirements.txt
