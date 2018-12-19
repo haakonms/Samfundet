@@ -9,7 +9,7 @@ Max test F1 score: 0.869.
 
 ### Running instructions:
 
-- The code was ran on Python version 3.6.5., with Keras version 2.1.6-tf with TensorFlow backend. In order to install all the packages required for this code, run
+- The code was ran on Python version 3.6.5., with Keras version 2.1.6-tf with TensorFlow backend. In order to install all the packages required for this code, make sure you have pip installed on your computer, and run
 
 	```
 	pip3 install -r requirements.txt
