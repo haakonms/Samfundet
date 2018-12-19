@@ -181,7 +181,7 @@ def extract_labels_pixelwise(filename, num_images, new_dim_train, val_img=[]):
 
 
 def extract_aug_data_and_labels_pixelwise(filename):
-    '''Extract the images into a 4D tensor [image index, y, x, channels]'''.
+    '''Extract the images into a 4D tensor [image index, y, x, channels]'''
     '''Values are rescaled from [0, 255] down to [0.0, 1.0].'''
 
     imgs = []
@@ -249,6 +249,10 @@ def load_data_context(train_data_filename, train_labels_filename, test_data_file
 
     print('Loading test images\n')
     x_test, _ = extract_data_context(test_data_filename,TESTING_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, 'test')
+
+    print('Train data shape: ',x_train.shape)
+    print('Train labels shape: ',y_train.shape)
+    print('Test data shape: ', x_test.shape)
 
     return x_train, y_train, x_test, x_val, y_val
 

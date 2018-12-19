@@ -215,7 +215,7 @@ def get_pred_postprocessed(filename, image_idx, datatype, IMG_PATCH_SIZE):
         image_filename = filename + imageid + ".png"
     elif (datatype == 'test'):
         #filename = prediction_test_dir + "predictimg_" + str(i) + ".png"
-        imageid = "predictimg_%d" % i
+        imageid = "gt_pred_%d" % i
         image_filename = filename + imageid + ".png"
     else:
         print('Error: Enter test or train')      
