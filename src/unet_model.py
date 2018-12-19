@@ -1,5 +1,8 @@
 ''' The model used in the U-Net training '''
 
+''' Credits: Tobias Sterbak '''
+''' https://www.depends-on-the-definition.com/unet-keras-segmenting-images/'''
+
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
@@ -15,16 +18,14 @@ def conv2d_block(input_tensor, n_filters, kernel_size=3, batchnorm=True):
     if batchnorm:
         x = BatchNormalization()(x)
     x = Activation("relu")(x)
-    #x = Activation("elu")(x)
-    #x = LeakyReLU(0.1)(x)
+
     # second layer
     x = Conv2D(filters=n_filters, kernel_size=(kernel_size, kernel_size), kernel_initializer="he_normal",
                padding="same")(x)
     if batchnorm:
         x = BatchNormalization()(x)
     x = Activation("relu")(x)
-    #x = Activation("elu")(x)
-    #x = LeakyReLU(0.1)(x)
+
     return x
 
 
@@ -72,4 +73,5 @@ def create_model_unet(input_img, n_filters=32, dropout=0.05, batchnorm=True):
     outputs = Conv2D(2, (1, 1), activation='softmax') (c9)
     
     model = Model(inputs=input_img, outputs=outputs)
+
     return model
