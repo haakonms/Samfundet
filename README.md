@@ -18,6 +18,12 @@ This is the code written by us for the EPFL Machine Learning course project 2. W
 
 - Download the .zip-file containing the data set from https://www.crowdai.org/challenges/epfl-ml-road-segmentation/dataset_files. Make sure that the folder 'data' containing these files are in the same folder as the src folder.
 
+- The best results obtained at crowdAI, can be reproduced by calling 
+	```
+	python3 src/run.py
+	```
+	from your terminal, when in the directory of the main folder. Make sure that you are in the src folder when running. 	This will load the best model and produce the submission file based on the implemented model and weights.
+
 - The best results obtained at crowdAI, can be reproduced by calling "python3 src/run.py" from your terminal, when in the directory of the main folder. Make sure that you are in the src folder when running. This will load the best model and produce the submission file based on the implemented model and weights.
 
 - The running is finished when "Finished." is printed to the terminal.
@@ -34,17 +40,16 @@ This code contains the following files in the src folder:
 
 * run.py 
 
-	- The reults will be reproduced when running run.py.
-	
+	- This script reproduces the best result.
 	
 * U_Net.ipynb (Jupyter Notebook)
 
-	- The notebook for training our U-Net model.
+	- The notebook for training the U-Net model.
 
 
 * CNN.ipynb (Jupyter Notebook)
 
-	- The notebook for training our basic CNN model.
+	- The notebook for training the CNN model.
 	
 	
 * unet_model.py
@@ -54,7 +59,7 @@ This code contains the following files in the src folder:
 
 * cnn_model.py
 
-	- Contains the basic CNN model.
+	- Contains the CNN model.
 
 
 * data_extraction.py
@@ -68,11 +73,7 @@ This code contains the following files in the src folder:
 	
 * mask_to_submission.py
 
-	- Code provided to us.
 	
-
-
-
 
 ### Credits
 
