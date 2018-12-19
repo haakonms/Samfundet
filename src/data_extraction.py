@@ -41,8 +41,13 @@ def load_data_unet(train_data_filename, train_labels_filename, test_data_filenam
             augmentation(data_dir, augImgDir, groundTruthDir, train_labels_filename, train_data_filename, TRAINING_SIZE, MAX_AUG,idx)
 
         x_train, y_train = extract_aug_data_and_labels_pixelwise(augImgDir)
+        print('Train data shape: ',x_train.shape)
+        print('Train labels shape: ',y_train.shape)
         _, x_val = extract_data_pixelwise(train_data_filename,TRAINING_SIZE, 'train', new_dim_train,idx)
         _, y_val = extract_labels_pixelwise(train_labels_filename,TRAINING_SIZE, new_dim_train,idx)
+
+
+
     # adding noise
     x_train = sp_noise(x_train, amount=saltpepper)
 

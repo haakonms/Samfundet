@@ -89,7 +89,7 @@ class_weights = class_weight.compute_class_weight('balanced',classes,y_train[:,:
 print('Class weights: ',class_weights) 
 
 inputs = Input((NEW_DIM_TRAIN, NEW_DIM_TRAIN,INPUT_CHANNELS))
-model = create_model(inputs)
+model = create_model_unet(inputs)
 model.summary()
 
 
