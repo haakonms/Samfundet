@@ -24,7 +24,7 @@ This is the code written by us for the EPFL Machine Learning course project 2. W
 	```
 	from your terminal, when in the directory of the main folder. Make sure that you are in the src folder when running. 	This will load the best model and produce the submission file based on the implemented model and weights.
 
-- The best results obtained at crowdAI, can be reproduced by calling "python3 src/run.py" from your terminal, when in the directory of the main folder. Make sure that you are in the src folder when running. This will load the best model and produce the submission file based on the implemented model and weights.
+- The best results obtained at crowdAI, can be reproduced by calling "python3 src/run.py" from your terminal, when in the directory of the main folder. This will load the best model and produce the submission file based on the implemented model and weights.
 
 - The running is finished when "Finished." is printed to the terminal.
 
