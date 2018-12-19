@@ -1,3 +1,7 @@
+''' OBS: HER SKAL NOTEBOOK LEGGES INN ISTEDET '''
+
+
+
 from __future__ import print_function
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -22,7 +26,7 @@ from F1_metrics import *
 from data_extraction import *
 from prediction import *
 from unet_pred import *
-from unetModel import *
+from unet_model import *
 
 
 import keras

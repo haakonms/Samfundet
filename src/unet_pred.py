@@ -1,9 +1,10 @@
-from PIL import Image
+''' Functions for making prediction images from the U-net model '''
+
 import numpy as np
+from PIL import Image
 import matplotlib.image as mpimg
 
-from helpers import *
-from image_processing import *
+from image_processing import img_float_to_uint8, post_process
 
 def get_prediction_pixel(img, model, NEW_DIM_TRAIN):
     
@@ -21,6 +22,7 @@ def get_prediction_pixel(img, model, NEW_DIM_TRAIN):
     output_prediction = prediction[:,:,:,0]
 
     return output_prediction
+
 
 def label_to_img_unet(imgwidth, imgheight, w, h, output_prediction,datatype):
 
@@ -56,7 +58,6 @@ def make_img_overlay_pixel(img, predicted_img, PIXEL_DEPTH):
     return new_img
 
 
-
 def get_predictionimage_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NEW_DIM_TRAIN):
 
     i = image_idx
@@ -87,6 +88,7 @@ def get_predictionimage_pixelwise(filename, image_idx, datatype, model, PIXEL_DE
     imgpredict = imgpred.resize((608,608))
 
     return imgpredict
+
 
 def get_pred_img_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NEW_DIM_TRAIN, prediction_test_dir):
 
@@ -120,6 +122,7 @@ def get_pred_img_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NE
 
     return imgpredict, img
 
+
 def get_prediction_with_overlay_pixelwise(filename, image_idx, datatype, model, PIXEL_DEPTH, NEW_DIM_TRAIN,IMG_PATCH_SIZE):
 
     i = image_idx
@@ -151,6 +154,7 @@ def get_prediction_with_overlay_pixelwise(filename, image_idx, datatype, model, 
     oimg = make_img_overlay_pixel(img, imgpred, PIXEL_DEPTH)
 
     return oimg, imgpred
+
 
 def get_postprocessed_unet(filename, image_idx, datatype):#, IMG_PATCH_SIZE):
 

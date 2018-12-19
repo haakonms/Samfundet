@@ -26,7 +26,7 @@ def conv2d_block(input_tensor, n_filters, kernel_size=3, batchnorm=True):
     return x
 
 
-def create_model(input_img, n_filters=16, dropout=0.5, batchnorm=True):
+def create_model(input_img, n_filters=32, dropout=0.05, batchnorm=True):
     # contracting path
     c1 = conv2d_block(input_img, n_filters=n_filters*1, kernel_size=3, batchnorm=batchnorm)
     p1 = MaxPooling2D((2, 2)) (c1)

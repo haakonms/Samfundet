@@ -1,6 +1,7 @@
+''' Tools for processing images '''
+
 import numpy as np
 import cv2
-
 
 def img_crop(im, w, h):
     list_patches = []
@@ -16,26 +17,12 @@ def img_crop(im, w, h):
             list_patches.append(im_patch)
     return list_patches
 
+
 def img_float_to_uint8(img, PIXEL_DEPTH):
     rimg = img - np.min(img)
     rimg = (rimg / np.max(rimg) * PIXEL_DEPTH).round().astype(np.uint8)
     return rimg
 
-def concatenate_images(img, gt_img):
-    nChannels = len(gt_img.shape)
-    w = gt_img.shape[0]
-    h = gt_img.shape[1]
-    if nChannels == 3:
-        cimg = np.concatenate((img, gt_img), axis=1)
-    else:
-        gt_img_3c = np.zeros((w, h, 3), dtype=np.uint8)
-        gt_img8 = img_float_to_uint8(gt_img)          
-        gt_img_3c[:,:,0] = gt_img8
-        gt_img_3c[:,:,1] = gt_img8
-        gt_img_3c[:,:,2] = gt_img8
-        img8 = img_float_to_uint8(img)
-        cimg = np.concatenate((img8, gt_img_3c), axis=1)
-    return cimg
 
 def post_process(img):
     kernel1 = cv2.getStructuringElement(cv2.MORPH_RECT,(33,1))
@@ -54,5 +41,3 @@ def post_process(img):
     img_close = cv2.bitwise_or(img3, img4)
     
     return img_close
-
-
