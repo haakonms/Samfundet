@@ -5,7 +5,7 @@ from PIL import Image
 import matplotlib.image as mpimg
 import cv2 as cv2
 
-from image_processing import img_float_to_uint8, post_process
+from data_extraction import img_float_to_uint8, post_process
 
 def get_prediction_pixel(img, model, NEW_DIM_TRAIN):
     

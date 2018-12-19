@@ -8,8 +8,7 @@ import cv2
 from PIL import Image
 import matplotlib.image as mpimg
 
-from image_processing import img_crop, img_float_to_uint8, post_process
-from data_extraction import value_to_class, img_crop_context
+from data_extraction import value_to_class, img_crop_context, img_crop, img_float_to_uint8, post_process
 
 
 # Convert array of labels to an image
