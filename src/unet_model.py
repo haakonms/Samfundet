@@ -1,5 +1,8 @@
 ''' The model used in the U-Net training '''
 
+''' Credits: Tobias Sterbak '''
+''' https://www.depends-on-the-definition.com/unet-keras-segmenting-images/'''
+
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
@@ -70,5 +73,5 @@ def create_model_unet(input_img, n_filters=32, dropout=0.05, batchnorm=True):
     outputs = Conv2D(2, (1, 1), activation='softmax') (c9)
     
     model = Model(inputs=input_img, outputs=outputs)
-    
+
     return model
