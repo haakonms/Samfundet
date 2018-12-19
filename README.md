@@ -3,7 +3,7 @@ Project in CS-433 - Machine Learning, EPFL (Fall 2018).
 
 Group: Maiken Berthelsen, Ida Sandsbraaten and Sigrid Wanvik Haugen.
 
-Max test F1 score: 0.869.
+Maximum achieved F1 score: 0.869.
 
 
 
@@ -26,7 +26,7 @@ Max test F1 score: 0.869.
 
 - The running is finished when "Finished." is printed to the terminal. The submission csv file can be found in the same folder with the name "submission.csv".
 
-- If you want to train the models from scratch, instead of loading the already trained one, you can use the Jupyter Notebooks CNN.ipynb (for the CNN model) and U_Net.ipynb (for the U-Net model).
+- If you want to train the models from scratch, instead of loading the already trained one, you can use the Jupyter Notebooks CNN.ipynb (for the CNN model) and U_Net.ipynb (for the U-Net model). We obtained the results by running the notebooks in Google's Colaboratory and using their GPU. The files found in the src must then be uploaded to the Colaboratory. In order to avoid timed-out error by running several epochs, the model.fit found under **Training the model** can be copied into several blocks, and then running only 5 or 10 epochs in each block.
 
 
 
