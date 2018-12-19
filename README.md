@@ -40,17 +40,17 @@ This code contains the following files in the src folder:
 
 * cnn.ipynb (Jupyter Notebook)
 
-	The notebook for training our basic CNN model.
+	- The notebook for training our basic CNN model.
 	
 	
 * unet_model.py
 
-	Contains the U-net model.
+	- Contains the U-net model.
 
 
 * cnn_model.py
 
-	Contains the basic CNN model.
+	- Contains the basic CNN model.
 
 
 * data_extraction.py
