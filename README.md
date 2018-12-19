@@ -14,11 +14,11 @@ Group: Maiken Berthelsen, Ida Sandsbraaten and Sigrid Wanvik Haugen.
 
 - Download the .zip-file containing the data set from https://www.crowdai.org/challenges/epfl-ml-road-segmentation/dataset_files. Make sure that the folder 'data' containing these files are in the same folder as the src folder.
 
-- The code can be run by calling "python run.py" from your terminal. Make sure that you are in the src folder when running. This will load the best model and produce the submission file based on the implemented model and weights.
+- The best results obtained at crowdAI, can be reproduced by calling "python run.py" from your terminal. Make sure that you are in the src folder when running. This will load the best model and produce the submission file based on the implemented model and weights.
 
 - The running is finished when "Finished" is printed to the terminal.
 
-- The submission csv file can be found in the same folder with the name "results.csv".
+- The submission csv file can be found in the same folder with the name "submission.csv".
 
 - If you want to train the model, instead of loading the already trained one, change ____ .
 
@@ -26,17 +26,31 @@ Group: Maiken Berthelsen, Ida Sandsbraaten and Sigrid Wanvik Haugen.
 
 
 ### Code architecture:
-This code contains the following files:
+This code contains the following files in the src folder:
+
 * run.py 
+	The reults will be reproduced when running run.py.
+	
+* unet.ipynb (Jupyter Notebook)
+	The notebook for training our U-net model.
 
-	The whole code can be executed by running run.py.
+* cnn.ipynb (Jupyter Notebook)
+	The notebook for training our basic CNN model.
+	
+* unet_model.py
+	Contains the U-net model.
 
-* helpers.py
+* cnn_model.py
+	Contains the basic CNN model.
 
-	Contains the given functions for loading csv, predicting labels and create a csv submission.
+* data_extraction.py
 
-* implementations.py
+* image_processing.py
 
+* image_augmentation.py
+	
+* mask_to_submission.py
+	Code provided to us.
 	
 
 
