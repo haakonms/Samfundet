@@ -8,11 +8,11 @@ Group: Maiken Berthelsen, Ida Sandsbraaten and Sigrid Wanvik Haugen.
 
 ### Running instructions:
 
-The code was ran on Python version 3.6.5., with Keras version 2.1.6-tf with TensorFlow backend. In order to install all the packages required for this code, is to run
+- The code was ran on Python version 3.6.5., with Keras version 2.1.6-tf with TensorFlow backend. In order to install all the packages required for this code, is to run
 
-```
-pip3 install -r requirements.txt
-```
+	```
+	pip3 install -r requirements.txt
+	```
 
 
 - Download the .zip-file containing the data set from https://www.crowdai.org/challenges/epfl-ml-road-segmentation/dataset_files. Make sure that the folder 'data' containing these files are in the same folder as the src folder.
