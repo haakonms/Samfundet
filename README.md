@@ -29,6 +29,7 @@ Group: Maiken Berthelsen, Ida Sandsbraaten and Sigrid Wanvik Haugen.
 This code contains the following files in the src folder:
 
 * run.py 
+
 	The reults will be reproduced when running run.py.
 	
 * unet.ipynb (Jupyter Notebook)
