@@ -11,7 +11,7 @@ from keras.optimizers import Adam
 from keras.losses import categorical_crossentropy
 
 from data_extraction import extract_data_pixelwise
-from unet_model import create_model
+from unet_model import create_model_unet
 from unet_pred import get_pred_img_pixelwise, make_img_overlay_pixel
 from mask_to_submission import masks_to_submission 
 
@@ -41,7 +41,7 @@ print('\nData loaded.')
 
 ''' Loading the model, compile using the Adam optimizer '''
 inputs = Input((IMG_DIMENSION, IMG_DIMENSION, NUM_CHANNELS))
-model = create_model(inputs)
+model = create_model_unet(inputs)
 print('Model loaded.')
 model.compile(loss=categorical_crossentropy,
               optimizer=Adam(),
@@ -74,7 +74,7 @@ for i in range(1,TESTING_SIZE+1):
   
 masks_to_submission(submission_path, *list_filename)
 print('\nFinished creating predictions! Submission file saved to', submission_path)
-print('Have a nice day :)')
+print('Have a nice day :)\n')
 print('Finished.\n\n')
 
 
