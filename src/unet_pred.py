@@ -172,9 +172,6 @@ def get_postprocessed_unet(filename, image_idx, datatype):#, IMG_PATCH_SIZE):
     img = cv2.imread(image_filename, cv2.IMREAD_GRAYSCALE)
     p_img = post_process(img)
 
-    #label_patches = img_crop(p_img, IMG_PATCH_SIZE, IMG_PATCH_SIZE)
-    #data = np.asarray(label_patches)
-    #labels = np.asarray([value_to_class(np.mean(data[i])) for i in range(len(data))])
     img_post = Image.fromarray(p_img)
 
     return img_post

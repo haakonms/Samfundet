@@ -368,7 +368,6 @@ def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, val_img=[]):
         imageid = "satImage_%.3d" % i
         image_filename = filename + imageid + ".png"
         if os.path.isfile(image_filename):
-            #print ('Loading ' + image_filename)
             img = mpimg.imread(image_filename)
             t_imgs.append(img)
         else:
@@ -378,7 +377,6 @@ def extract_labels_context(filename, num_images, IMG_PATCH_SIZE, val_img=[]):
         imageid = "satImage_%.3d" % i
         image_filename = filename + imageid + ".png"
         if os.path.isfile(image_filename):
-            #print ('Loading ' + image_filename)
             img = mpimg.imread(image_filename)
             v_imgs.append(img)
         else:

@@ -107,42 +107,6 @@ def get_prediction_with_overlay(filename, image_idx, datatype, model, IMG_PATCH_
 
     return oimg
 
-'''def save_overlay_and_prediction(filename, image_idx,datatype,model,IMG_PATCH_SIZE,PIXEL_DEPTH, prediction_training_dir):
-    i = image_idx
-    # Specify the path of the 
-    if (datatype == 'train'):
-        imageid = "satImage_%.3d" % image_idx
-        image_filename = filename + imageid + ".png"
-    elif (datatype == 'test'):
-        imageid = "/test_%d" % i
-        image_filename = filename + imageid + imageid + ".png"
-    else:
-        print('Error: Enter test or train')      
-
-    # loads the image in question
-    img = mpimg.imread(image_filename)
-
-    # Returns a vector with a prediction for each patch
-    output_prediction = get_prediction(img, model, IMG_PATCH_SIZE)
-    # Returns a representation of the image as a 2D vector with a label at each pixel
-    img_prediction = label_to_img(img.shape[0],img.shape[1], IMG_PATCH_SIZE, IMG_PATCH_SIZE, output_prediction)
-
-    # Changes into a 3D array, to easier turn into image
-    predict_img_3c = np.zeros((img.shape[0],img.shape[1], 3), dtype=np.uint8)
-    predict_img8 = img_float_to_uint8(img_prediction, PIXEL_DEPTH)          
-    predict_img_3c[:,:,0] = predict_img8
-    predict_img_3c[:,:,1] = predict_img8
-    predict_img_3c[:,:,2] = predict_img8
-
-    imgpred = Image.fromarray(predict_img_3c)
-    oimg = make_img_overlay(img, img_prediction, PIXEL_DEPTH)
-
-    oimg.save(prediction_training_dir + "overlay_" + str(i) + ".png")
-    imgpred.save(prediction_training_dir + "predictimg_" + str(i) + ".png")
-
-    return'''
-
-
 
 def get_prediction_context(img, model, IMG_PATCH_SIZE, CONTEXT_SIZE):
     # Turns the image into its data patches
