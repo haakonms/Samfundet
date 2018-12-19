@@ -31,8 +31,40 @@ Maximum achieved F1 score: 0.869.
 
 
 
-### Code architecture:
-This code contains the following files in the src folder:
+### Source code architecture:
+This folder contains the following files:
+
+```
+-- data/
+	- test_set_images/
+	- training/
+
+-- src/
+	- run.py 
+	- U_Net.ipynb 
+	- CNN.ipynb
+	- unet_model.py
+	- cnn_model.py 
+	- data_extraction.py
+	- image_processing.py
+	- image_augmentation.py
+	- mask_to_submission.py
+
+-- weights/
+	- UNET_best_weights.hdf5
+	
+```
+
+In the data folder, all the images used to train and test the model are stored. The src folder contains all the code, better described below. The weights folder contains the weigths for the U-Net model which reproduces the best result on CrowdAI, which is done by running 
+
+```
+Python3 src/run.py
+```
+as described above.
+
+
+
+### Overwiev of Python files
 
 * run.py 
 
