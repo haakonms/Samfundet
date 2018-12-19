@@ -30,12 +30,12 @@ This code contains the following files in the src folder:
 
 * run.py 
 
-	The reults will be reproduced when running run.py.
+	- The reults will be reproduced when running run.py.
 	
 	
 * unet.ipynb (Jupyter Notebook)
 
-	The notebook for training our U-net model.
+	- The notebook for training our U-net model.
 
 
 * cnn.ipynb (Jupyter Notebook)
