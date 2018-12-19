@@ -1,5 +1,9 @@
+''' Functions for creating augmented images based on the training images, '''
+''' to increase the size of the training data set                         '''
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 import numpy as np
 import shutil
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
@@ -31,7 +35,6 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
             )
 
 
-
     if os.path.exists(imgDir):
         shutil.rmtree(imgDir)
         print("Directory " , imgDir ,  " already exists, overwritten")
@@ -41,7 +44,7 @@ def augmentation(data_dir, imgDir, groundTruthDir, train_labels_filename, train_
         print("Directory " , groundTruthDir ,  " already exists, overwritten")
     os.makedirs(groundTruthDir)
 
-    #moving original pictures to augmentet position
+    # moving original pictures to augmentet position
     for i in train_img:
       imageid = "satImage_%.3d" % i
       image_filename = train_data_filename + imageid + ".png"

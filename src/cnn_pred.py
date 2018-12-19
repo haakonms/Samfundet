@@ -1,5 +1,5 @@
-from __future__ import print_function
-import gzip
+''' Functions for making prediction images from the CNN model '''
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 

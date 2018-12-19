@@ -1,3 +1,5 @@
+''' The model used in the CNN training '''
+
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from keras.utils import np_utils

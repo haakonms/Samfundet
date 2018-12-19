@@ -1,4 +1,5 @@
-#from __future__ import print_function
+''' This script recreates the best result we achieved, F1 = 0.869 in CrowdAI '''
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -56,7 +57,7 @@ print('Weights loaded, creating predictions...\n')
 
 
 ''' Creating predictions and overlay images on the testing set '''
-list_filename = []
+filenames = []
 if not os.path.isdir(prediction_test_dir):
     os.mkdir(prediction_test_dir)
 
@@ -66,13 +67,13 @@ for i in range(1,TESTING_SIZE+1):
   
   groundtruth_prediction, original_img = get_pred_img_pixelwise(test_data_filename, i, 'test', model, PIXEL_DEPTH, IMG_DIMENSION, prediction_test_dir)
   gt_filename = prediction_test_dir + "gt_pred_" + str(i) + ".png"
-  list_filename.append(gt_filename)
+  filenames.append(gt_filename)
   groundtruth_prediction.save(gt_filename)
   
   overlay = make_img_overlay_pixel(original_img, groundtruth_prediction, PIXEL_DEPTH)
   overlay.save(prediction_test_dir + "overlay_" + str(i) + ".png")
   
-masks_to_submission(submission_path, *list_filename)
+masks_to_submission(submission_path, *filenames)
 print('\nFinished creating predictions! Submission file saved to', submission_path)
 print('Have a nice day :)\n')
 print('Finished.\n\n')

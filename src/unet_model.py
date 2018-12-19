@@ -1,3 +1,5 @@
+''' The model used in the U-Net training '''
+
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *

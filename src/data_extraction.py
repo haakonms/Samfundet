@@ -1,3 +1,10 @@
+''' Code for extracting the training and testing data                                                      '''
+''' load_data_unet() loads the images pixelwise, for the U-Net model                                       '''
+''' load_data_context() loads the patches of the images, with the desired context frame, for the CNN model '''
+''' For both functions there is the possibility to increase the number of training data by augmentation    '''
+''' Both also enable adding noise                                                                          '''
+
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -12,7 +19,7 @@ from image_augmentation import augmentation, sp_noise
 
 
 def value_to_class(v):
-    foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
+    foreground_threshold = 0.25 
     df = np.sum(v)
     if df > foreground_threshold:
         return [0, 1]
@@ -35,11 +42,12 @@ def img_crop(im, w, h):
     return list_patches
 
 
+'''UNET DATA EXTRACTION'''
+
+
 def load_data_unet(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, TESTING_SIZE,VALIDATION_SIZE, 
     new_dim_train,saltpepper = 0.004,augment=False,MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir='',newaugment=True):
     
-    # if validation set is used these are taken out before augmentation so that it is not trained on a small augmentation 
-    # of the same image
     idx = random.sample(range(1, 100), VALIDATION_SIZE)
     if augment == False:
         print('No augmenting of training images')
@@ -62,9 +70,7 @@ def load_data_unet(train_data_filename, train_labels_filename, test_data_filenam
         _, x_val = extract_data_pixelwise(train_data_filename,TRAINING_SIZE, 'train', new_dim_train,idx)
         _, y_val = extract_labels_pixelwise(train_labels_filename,TRAINING_SIZE, new_dim_train,idx)
 
-
-
-    # adding noise
+    '''adding noise'''
     x_train = sp_noise(x_train, amount=saltpepper)
 
     x_test,_ = extract_data_pixelwise(test_data_filename,TESTING_SIZE,  'test', new_dim_train)
@@ -79,9 +85,10 @@ def load_data_unet(train_data_filename, train_labels_filename, test_data_filenam
 
 
 def extract_data_pixelwise(filename,num_images, datatype, new_dim_train,val_img=[]):
-    # Extract the images into a 4D tensor [image index, y, x, channels].
-    # Values are rescaled from [0, 255] down to [0.0, 1.0].
-    # Dividing into training and validation set
+    ''' Extract the images into a 4D tensor [image index, y, x, channels].'''
+    ''' Values are rescaled from [0, 255] down to [0.0, 1.0].'''
+    ''' Dividing into training and validation set '''
+    
     t_imgs = []
     v_imgs = []
     all_img = range(1,num_images+1)
@@ -120,11 +127,11 @@ def extract_data_pixelwise(filename,num_images, datatype, new_dim_train,val_img=
     return t_arr,v_arr
 
 
-
 def extract_labels_pixelwise(filename, num_images, new_dim_train, val_img=[]):
-    # Extract the labels into a 1-hot matrix [image index, label index].
-    # We want the images with depth = 2, one for each class, one of the depths is 1 and the other 0
-    # dividing the labels into training set and validation set
+    '''Extract the labels into a 1-hot matrix [image index, label index].'''
+    '''We want the images with depth = 2, one for each class, one of the depths is 1 and the other 0'''
+    ''' dividing the labels into training set and validation set'''
+    
     t_imgs = []
     v_imgs = []
     all_img = range(1,num_images+1)
@@ -172,16 +179,19 @@ def extract_labels_pixelwise(filename, num_images, new_dim_train, val_img=[]):
     # Convert to dense 1-hot representation.
     return t_labels.astype(np.float32),v_labels.astype(np.float32)
 
+
 def extract_aug_data_and_labels_pixelwise(filename):
-    # Extract the images into a 4D tensor [image index, y, x, channels].
-    # Values are rescaled from [0, 255] down to [0.0, 1.0].
+    '''Extract the images into a 4D tensor [image index, y, x, channels]'''.
+    '''Values are rescaled from [0, 255] down to [0.0, 1.0].'''
 
     imgs = []
     gt_imgs = []
     pathlist = Path(filename).glob('**/*.png')
+    
     # goes through all the augmented images in image directory
     # must pair them with all the augmented groundtruth images
     # and therefore we finds the corresponding string of the groundtruth name
+    
     for path in pathlist:
         # because path is object not string
         image_path = str(path)
@@ -211,7 +221,7 @@ def extract_aug_data_and_labels_pixelwise(filename):
 
 
 
-############### CONTEXT ############
+'''CNN DATA EXTRACTION'''
 
 def load_data_context(train_data_filename, train_labels_filename, test_data_filename, TRAINING_SIZE, VALIDATION_SIZE, IMG_PATCH_SIZE, CONTEXT_SIZE, TESTING_SIZE, saltpepper = 0.004, augment=False, MAX_AUG=1, augImgDir='', data_dir='', groundTruthDir='', newaugment=True):
 
@@ -307,13 +317,14 @@ def extract_data_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE, dat
 
 def extract_aug_data_and_labels_context(filename, num_images, IMG_PATCH_SIZE, CONTEXT_SIZE, val_img=[]):
     """Extract the images into a 4D tensor [image index, y, x, channels].
-    Values are rescaled from [0, 255] down to [-0.5, 0.5].
+    Values are rescaled from [0, 255] down to [0.0, 1.0].
     """
     imgs = []
     gt_imgs = []
-    #pathlist = Path(filename).glob('**/*.png')
+
     glob_path = Path(filename)
     pathlist = [str(pp) for pp in glob_path.glob('**/*.png')]
+    
     #goes through all the augmented images in image directory
     # must pair them with all the augmented groundtruth images
     for path in pathlist:
