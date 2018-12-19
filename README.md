@@ -3,7 +3,7 @@ Project in CS-433 - Machine Learning, EPFL (Fall 2018).
 
 Group: Maiken Berthelsen, Ida Sandsbraaten and Sigrid Wanvik Haugen.
 
-This is the code written by us for the EPFL Machine Learning course project 2. We achieved a max F1 score of 0.869.
+Max test F1 score: 0.869.
 
 
 
@@ -23,8 +23,6 @@ This is the code written by us for the EPFL Machine Learning course project 2. W
 	python3 src/run.py
 	```
 	from your terminal, when in the directory of the main folder. Make sure that you are in the src folder when running. 	This will load the best model and produce the submission file based on the implemented model and weights.
-
-- The best results obtained at crowdAI, can be reproduced by calling "python3 src/run.py" from your terminal, when in the directory of the main folder. This will load the best model and produce the submission file based on the implemented model and weights.
 
 - The running is finished when "Finished." is printed to the terminal.
 
