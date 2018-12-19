@@ -24,9 +24,7 @@ Max test F1 score: 0.869.
 	```
 	from your terminal, when in the directory of the main folder. Make sure that you are in the src folder when running. 	This will load the best model and produce the submission file based on the implemented model and weights.
 
-- The running is finished when "Finished." is printed to the terminal.
-
-- The submission csv file can be found in the same folder with the name "submission.csv".
+- The running is finished when "Finished." is printed to the terminal. The submission csv file can be found in the same folder with the name "submission.csv".
 
 - If you want to train the models from scratch, instead of loading the already trained one, you can use the Jupyter Notebooks CNN.ipynb (for the CNN model) and U_Net.ipynb (for the U-Net model).
 
