@@ -16,7 +16,7 @@ Maximum achieved F1 score: 0.869.
 	```
 
 
-- Download the .zip-file containing the data set from https://www.crowdai.org/challenges/epfl-ml-road-segmentation/dataset_files. Make sure that the folder 'data' containing these files are in the same folder as the src folder.
+- Download the .zip-file containing the data set from [HERE](https://www.crowdai.org/challenges/epfl-ml-road-segmentation/dataset_files). Make sure that the folder 'data' containing these files are in the same folder as the src folder, as in the File structure shown below.
 
 - The best results obtained at crowdAI, can be reproduced by calling 
 	```
@@ -31,27 +31,28 @@ Maximum achieved F1 score: 0.869.
 
 
 
-### Source code architecture:
+### File structure:
 The main folder should have the following structure:
 
 ```
--- data/
-	- test_set_images/
-	- training/
+-- main_folder/
+	- data/
+		- test_set_images/
+		- training/
 
--- src/
-	- run.py 
-	- U_Net.ipynb 
-	- CNN.ipynb
-	- unet_model.py
-	- cnn_model.py 
-	- data_extraction.py
-	- image_processing.py
-	- image_augmentation.py
-	- mask_to_submission.py
+	- src/
+		- run.py 
+		- U_Net.ipynb 
+		- CNN.ipynb
+		- unet_model.py
+		- cnn_model.py 
+		- data_extraction.py
+		- image_processing.py
+		- image_augmentation.py
+		- mask_to_submission.py
 
--- weights/
-	- UNET_best_weights.hdf5
+	- weights/
+		- UNET_best_weights.hdf5
 	
 ```
 
