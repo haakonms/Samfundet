@@ -32,7 +32,7 @@ Maximum achieved F1 score: 0.869.
 
 
 ### Source code architecture:
-This folder contains the following files:
+The main folder should have the following structure:
 
 ```
 -- data/
