@@ -32,25 +32,38 @@ This code contains the following files in the src folder:
 
 	The reults will be reproduced when running run.py.
 	
+	
 * unet.ipynb (Jupyter Notebook)
+
 	The notebook for training our U-net model.
 
+
 * cnn.ipynb (Jupyter Notebook)
+
 	The notebook for training our basic CNN model.
 	
+	
 * unet_model.py
+
 	Contains the U-net model.
 
+
 * cnn_model.py
+
 	Contains the basic CNN model.
+
 
 * data_extraction.py
 
+
 * image_processing.py
+
 
 * image_augmentation.py
 	
+	
 * mask_to_submission.py
+
 	Code provided to us.
 	
 
