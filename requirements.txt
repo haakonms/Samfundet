@@ -1,0 +1,8 @@
+numpy
+scipy
+Pillow
+matplotlib
+tensorflow
+keras
+opencv-python
+h5py==2.8.0rc1 
