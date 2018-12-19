@@ -3,6 +3,7 @@ Project in CS-433 - Machine Learning, EPFL (Fall 2018).
 
 Group: Maiken Berthelsen, Ida Sandsbraaten and Sigrid Wanvik Haugen.
 
+This is the code written by us for the EPFL Machine Learning course project 2. We achieved a max F1 score of 0.869.
 
 
 
@@ -73,7 +74,6 @@ This code contains the following files in the src folder:
 
 
 
-#### Misc
+### Credits
 
-
-
+Much of the source code is based on the code given to us from the course, written by Aurelien Lucchi, ETH Zürich, found [HERE](https://github.com/epfml/ML_course/blob/master/projects/project2/project_road_segmentation/tf_aerial_images.py). The U-Net architechture is based on Tobias Sterkbak's, found [HERE](https://www.depends-on-the-definition.com/unet-keras-segmenting-images/).
