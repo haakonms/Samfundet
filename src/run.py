@@ -77,28 +77,3 @@ masks_to_submission(submission_path, *filenames)
 print('\nFinished creating predictions! Submission file saved to', submission_path)
 print('Have a nice day :)\n')
 print('Finished.\n\n')
-
-
-
-''' Creating prediction and overlay images on the testing set, after post-processing '''
-'''new_test_filename = data_dir + 'test_set_post_images/'
-post_processed_list = []
-if not os.path.isdir(new_test_filename):
-    os.mkdir(new_test_filename)
-
-
-for i in range(1,TESTING_SIZE+1):
-    p_img = get_postprocessed_unet(prediction_test_dir, i, 'test')
-    filename = new_test_filename + "processedimg_" + str(i) + ".png"
-    post_processed_list.append(filename)
-    p_img.save(filename)
-    pred = Image.open(filename)
-    pred = pred.convert('RGB')
-    imageid = "/test_%d" % i
-    image_filename = test_data_filename + imageid + imageid + ".png"
-    overlay = make_img_overlay_pixel(orImg, pred, PIXEL_DEPTH)
-    overlay.save(new_test_filename + "overlay_" + str(i) + ".png")
-
-masks_to_submission("Submission_postprocess.csv", *post_processed_list)'''
-
-
