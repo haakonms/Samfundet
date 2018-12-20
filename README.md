@@ -16,7 +16,7 @@ Maximum achieved F1 score: 0.869.
 	```
 	in your terminal when in the main folder, and press enter.
 
-- Download the .zip-file containing the data set from [HERE](https://www.crowdai.org/challenges/epfl-ml-road-segmentation/dataset_files). Make sure that the folder 'data' containing these files are in the same folder as the src folder, as in the File structure shown below.
+- Download test_set_images.zip and training.zip containing the data set from [HERE](https://www.crowdai.org/challenges/epfl-ml-road-segmentation/dataset_files). Unzip the folder, and place them in a folder 'data', and place this in the same folder as the src folder, as in the File structure shown below.
 
 - The best results obtained at crowdAI, can be reproduced by calling 
 	```
