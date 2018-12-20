@@ -28,7 +28,7 @@ IMG_DIMENSION = 400 # The images are resized to this
 
 ''' Directives for where the training images are stored '''
 test_data_filename = 'data/test_set_images'
-prediction_test_dir = 'data/predictions_test/'
+prediction_test_dir = 'predictions_test/'
 weight_path = 'weights/UNET_best_weights.hdf5' 
 submission_path = 'submission.csv'
 
