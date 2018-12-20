@@ -14,7 +14,7 @@ Maximum achieved F1 score: 0.869.
 	```
 	pip3 install -r requirements.txt
 	```
-
+	in your terminal when in the main folder.
 
 - Download the .zip-file containing the data set from [HERE](https://www.crowdai.org/challenges/epfl-ml-road-segmentation/dataset_files). Make sure that the folder 'data' containing these files are in the same folder as the src folder, as in the File structure shown below.
 
