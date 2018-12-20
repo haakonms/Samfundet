@@ -9,12 +9,12 @@ Maximum achieved F1 score: 0.869.
 
 ### Running instructions:
 
-- The code was ran on Python version 3.6.5, with Keras version 2.1.6-tf with TensorFlow backend. In order to install all the packages required for this code, make sure you have the correct version of python, and **pip3** installed on your computer, and run
+- The code runs on Python version 3.6.5, with Keras version 2.1.6-tf with TensorFlow backend. In order to install all the packages required for this code, make sure you have the correct version of Python (3.6.5), and **pip3** installed on your computer. Then copy paste
 
 	```
 	pip3 install -r requirements.txt
 	```
-	in your terminal when in the main folder.
+	in your terminal when in the main folder, and press enter.
 
 - Download the .zip-file containing the data set from [HERE](https://www.crowdai.org/challenges/epfl-ml-road-segmentation/dataset_files). Make sure that the folder 'data' containing these files are in the same folder as the src folder, as in the File structure shown below.
 
@@ -24,7 +24,9 @@ Maximum achieved F1 score: 0.869.
 	```
 	from your terminal, when in the directory of the main folder. This will load the best model and produce the submission file based on the implemented model and weights. The running is finished when "Finished." is printed to the terminal. The submission csv file can be found in the same folder with the name "submission.csv".
 
-- If you want to train the models from scratch, instead of loading the already trained one, you can use the Jupyter Notebooks CNN.ipynb (for the CNN model) and U_Net.ipynb (for the U-Net model). We obtained the results by running the notebooks in Google's Colaboratory and using their GPU. The files found in the src must then be uploaded to the Colaboratory. In order to avoid timed-out error by running several epochs, the model.fit()-command found under **Training the model** can be copied into several blocks, and then running only 5 or 10 epochs in each block.
+- If you want to train the models from scratch, instead of loading the already trained one, you can use the Jupyter Notebooks CNN.ipynb (for the CNN model) and U_Net.ipynb (for the U-Net model). The Jupyter Notebooks can be used via [Anaconda](https://www.anaconda.com/).
+
+- We obtained the results by running the notebooks in Google's Colaboratory and using their GPU. The files found in the src must then be uploaded to the Colaboratory. In order to avoid timed-out error by running several epochs, the model.fit()-command found under **Training the model** can be copied into several blocks, and then running only 5 or 10 epochs in each block.
 
 
 
