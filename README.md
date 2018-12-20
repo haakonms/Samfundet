@@ -3,7 +3,7 @@ Project in CS-433 - Machine Learning, EPFL (Fall 2018).
 
 Group: Maiken Berthelsen, Ida Sandsbraaten and Sigrid Wanvik Haugen.
 
-Maximum achieved F1 score: 0.869.
+Maximum achieved F1 score: 0.869. (Name on crowdAI: Sigrid Haugen, ID: 24694)
 
 
 
