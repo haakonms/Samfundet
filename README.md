@@ -26,7 +26,7 @@ Maximum achieved F1 score: 0.869.
 
 - If you want to train the models from scratch, instead of loading the already trained one, you can use the Jupyter Notebooks CNN.ipynb (for the CNN model) and U_Net.ipynb (for the U-Net model). The Jupyter Notebooks can be used via [Anaconda](https://www.anaconda.com/).
 
-- We obtained the results by running the notebooks in Google's Colaboratory and using their GPU. The files found in the src must then be uploaded to the Colaboratory. In order to avoid timed-out error by running several epochs, the model.fit()-command found under **Training the model** can be copied into several blocks, and then running only 5 or 10 epochs in each block.
+- We obtained the results by running the notebooks in [Google's Colaboratory](https://colab.research.google.com/) and using their GPU. The files found in the src must then be uploaded to the Colaboratory. In order to avoid timed-out error by running several epochs, the model.fit()-command found under **Training the model** can be copied into several blocks, and then running only 5 or 10 epochs in each block.
 
 
 
